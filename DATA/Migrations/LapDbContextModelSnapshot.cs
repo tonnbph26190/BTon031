@@ -44,6 +44,29 @@ namespace DATA.Migrations
                     b.ToTable("Batteries");
                 });
 
+            modelBuilder.Entity("DATA.Entity.Case", b =>
+                {
+                    b.Property<string>("ID")
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<string>("Value")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Cases");
+                });
+
             modelBuilder.Entity("DATA.Entity.Category", b =>
                 {
                     b.Property<string>("ID")
@@ -61,6 +84,52 @@ namespace DATA.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("DATA.Entity.Cooling", b =>
+                {
+                    b.Property<string>("ID")
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<string>("Value")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Coolings");
+                });
+
+            modelBuilder.Entity("DATA.Entity.Custom", b =>
+                {
+                    b.Property<string>("ID")
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<string>("Value")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Customs");
                 });
 
             modelBuilder.Entity("DATA.Entity.Laptop", b =>
@@ -242,6 +311,293 @@ namespace DATA.Migrations
                     b.ToTable("Mains");
                 });
 
+            modelBuilder.Entity("DATA.Entity.Monitor", b =>
+                {
+                    b.Property<string>("ID")
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("CatId")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("CategoryID")
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("ProducerId")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("CategoryID");
+
+                    b.HasIndex("ProducerId");
+
+                    b.ToTable("Monitors");
+                });
+
+            modelBuilder.Entity("DATA.Entity.MonitorDetail", b =>
+                {
+                    b.Property<string>("ID")
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<int>("Brightness")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<decimal>("COGS")
+                        .HasColumnType("DECIMAL(18, 2)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)");
+
+                    b.Property<string>("Display")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)");
+
+                    b.Property<int>("Inch")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<string>("MonitorID")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)");
+
+                    b.Property<string>("PanelID")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("DECIMAL(18, 2)");
+
+                    b.Property<int>("Quatity")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<string>("Rate")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("NVARCHAR2(20)");
+
+                    b.Property<string>("ResolutionID")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)");
+
+                    b.Property<int>("ResponseTime")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<string>("Seri")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("NVARCHAR2(20)");
+
+                    b.Property<string>("Speaker")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("MonitorID");
+
+                    b.HasIndex("PanelID");
+
+                    b.HasIndex("ResolutionID");
+
+                    b.ToTable("MnitorDetails");
+                });
+
+            modelBuilder.Entity("DATA.Entity.Panel", b =>
+                {
+                    b.Property<string>("ID")
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<string>("Value")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Panels");
+                });
+
+            modelBuilder.Entity("DATA.Entity.PC", b =>
+                {
+                    b.Property<string>("ID")
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("CatId")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("CategoryID")
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("ProducerId")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("CategoryID");
+
+                    b.HasIndex("ProducerId");
+
+                    b.ToTable("PCs");
+                });
+
+            modelBuilder.Entity("DATA.Entity.PcDetail", b =>
+                {
+                    b.Property<string>("ID")
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<decimal>("COGS")
+                        .HasColumnType("DECIMAL(18, 2)");
+
+                    b.Property<string>("CaseID")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("CoolingID")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("CustomID")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("MainID")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("PcID")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("PowerID")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("DECIMAL(18, 2)");
+
+                    b.Property<int>("Quatity")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<string>("RamID")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("SSDId")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("Seri")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("NVARCHAR2(20)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<string>("VgaID")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("CaseID");
+
+                    b.HasIndex("CoolingID");
+
+                    b.HasIndex("CustomID");
+
+                    b.HasIndex("MainID");
+
+                    b.HasIndex("PcID");
+
+                    b.HasIndex("PowerID");
+
+                    b.HasIndex("RamID");
+
+                    b.HasIndex("SSDId");
+
+                    b.HasIndex("VgaID");
+
+                    b.ToTable("PcDetails");
+                });
+
+            modelBuilder.Entity("DATA.Entity.Power", b =>
+                {
+                    b.Property<string>("ID")
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<string>("Value")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Powers");
+                });
+
             modelBuilder.Entity("DATA.Entity.Producer", b =>
                 {
                     b.Property<string>("ID")
@@ -282,6 +638,29 @@ namespace DATA.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("Rams");
+                });
+
+            modelBuilder.Entity("DATA.Entity.Resolution", b =>
+                {
+                    b.Property<string>("ID")
+                        .HasMaxLength(30)
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<string>("Value")
+                        .HasMaxLength(50)
+                        .HasColumnType("NVARCHAR2(50)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Resolutions");
                 });
 
             modelBuilder.Entity("DATA.Entity.Screen", b =>
@@ -448,14 +827,167 @@ namespace DATA.Migrations
                     b.Navigation("Webcam");
                 });
 
+            modelBuilder.Entity("DATA.Entity.Monitor", b =>
+                {
+                    b.HasOne("DATA.Entity.Category", "Category")
+                        .WithMany("Monitors")
+                        .HasForeignKey("CategoryID");
+
+                    b.HasOne("DATA.Entity.Producer", "producer")
+                        .WithMany("Monitors")
+                        .HasForeignKey("ProducerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("producer");
+                });
+
+            modelBuilder.Entity("DATA.Entity.MonitorDetail", b =>
+                {
+                    b.HasOne("DATA.Entity.Monitor", "Monitor")
+                        .WithMany("MonitorDetails")
+                        .HasForeignKey("MonitorID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DATA.Entity.Panel", "Panel")
+                        .WithMany("MonitorDetails")
+                        .HasForeignKey("PanelID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DATA.Entity.Resolution", "Resolution")
+                        .WithMany("MonitorDetails")
+                        .HasForeignKey("ResolutionID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Monitor");
+
+                    b.Navigation("Panel");
+
+                    b.Navigation("Resolution");
+                });
+
+            modelBuilder.Entity("DATA.Entity.PC", b =>
+                {
+                    b.HasOne("DATA.Entity.Category", "Category")
+                        .WithMany("PCs")
+                        .HasForeignKey("CategoryID");
+
+                    b.HasOne("DATA.Entity.Producer", "producer")
+                        .WithMany("PCs")
+                        .HasForeignKey("ProducerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("producer");
+                });
+
+            modelBuilder.Entity("DATA.Entity.PcDetail", b =>
+                {
+                    b.HasOne("DATA.Entity.Case", null)
+                        .WithMany("PC_Detail")
+                        .HasForeignKey("CaseID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DATA.Entity.Cooling", "cooling")
+                        .WithMany("PC_Detail")
+                        .HasForeignKey("CoolingID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DATA.Entity.Custom", "Custom")
+                        .WithMany("PC_Detail")
+                        .HasForeignKey("CustomID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DATA.Entity.Main", "Main")
+                        .WithMany("PcDetails")
+                        .HasForeignKey("MainID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DATA.Entity.PC", "PC")
+                        .WithMany("PC_Detail")
+                        .HasForeignKey("PcID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DATA.Entity.Power", "Power")
+                        .WithMany("PC_Detail")
+                        .HasForeignKey("PowerID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DATA.Entity.Ram", "Ram")
+                        .WithMany("PcDetails")
+                        .HasForeignKey("RamID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DATA.Entity.SSD", "SSD")
+                        .WithMany("PcDetails")
+                        .HasForeignKey("SSDId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DATA.Entity.VGA", "VGA")
+                        .WithMany("PcDetails")
+                        .HasForeignKey("VgaID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Custom");
+
+                    b.Navigation("Main");
+
+                    b.Navigation("PC");
+
+                    b.Navigation("Power");
+
+                    b.Navigation("Ram");
+
+                    b.Navigation("SSD");
+
+                    b.Navigation("VGA");
+
+                    b.Navigation("cooling");
+                });
+
             modelBuilder.Entity("DATA.Entity.Battery", b =>
                 {
                     b.Navigation("Laptop_Detail");
                 });
 
+            modelBuilder.Entity("DATA.Entity.Case", b =>
+                {
+                    b.Navigation("PC_Detail");
+                });
+
             modelBuilder.Entity("DATA.Entity.Category", b =>
                 {
                     b.Navigation("Laptop");
+
+                    b.Navigation("Monitors");
+
+                    b.Navigation("PCs");
+                });
+
+            modelBuilder.Entity("DATA.Entity.Cooling", b =>
+                {
+                    b.Navigation("PC_Detail");
+                });
+
+            modelBuilder.Entity("DATA.Entity.Custom", b =>
+                {
+                    b.Navigation("PC_Detail");
                 });
 
             modelBuilder.Entity("DATA.Entity.Laptop", b =>
@@ -466,16 +998,49 @@ namespace DATA.Migrations
             modelBuilder.Entity("DATA.Entity.Main", b =>
                 {
                     b.Navigation("Laptop_Detail");
+
+                    b.Navigation("PcDetails");
+                });
+
+            modelBuilder.Entity("DATA.Entity.Monitor", b =>
+                {
+                    b.Navigation("MonitorDetails");
+                });
+
+            modelBuilder.Entity("DATA.Entity.Panel", b =>
+                {
+                    b.Navigation("MonitorDetails");
+                });
+
+            modelBuilder.Entity("DATA.Entity.PC", b =>
+                {
+                    b.Navigation("PC_Detail");
+                });
+
+            modelBuilder.Entity("DATA.Entity.Power", b =>
+                {
+                    b.Navigation("PC_Detail");
                 });
 
             modelBuilder.Entity("DATA.Entity.Producer", b =>
                 {
                     b.Navigation("Laptop");
+
+                    b.Navigation("Monitors");
+
+                    b.Navigation("PCs");
                 });
 
             modelBuilder.Entity("DATA.Entity.Ram", b =>
                 {
                     b.Navigation("Laptop_Detail");
+
+                    b.Navigation("PcDetails");
+                });
+
+            modelBuilder.Entity("DATA.Entity.Resolution", b =>
+                {
+                    b.Navigation("MonitorDetails");
                 });
 
             modelBuilder.Entity("DATA.Entity.Screen", b =>
@@ -486,11 +1051,15 @@ namespace DATA.Migrations
             modelBuilder.Entity("DATA.Entity.SSD", b =>
                 {
                     b.Navigation("Laptop_Detail");
+
+                    b.Navigation("PcDetails");
                 });
 
             modelBuilder.Entity("DATA.Entity.VGA", b =>
                 {
                     b.Navigation("Laptop_Detail");
+
+                    b.Navigation("PcDetails");
                 });
 
             modelBuilder.Entity("DATA.Entity.Webcam", b =>

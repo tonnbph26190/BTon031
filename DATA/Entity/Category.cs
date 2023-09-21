@@ -18,5 +18,7 @@ namespace DATA.Entity
         [RegularExpression(@"^-?\d+$")]
         public int Status { get; set; }
         public ICollection<Laptop>? Laptop { get; set; }
+        public ICollection<PC>? PCs { get; set; }
+        public ICollection<Monitor>? Monitors { get; set; }
     }
 }

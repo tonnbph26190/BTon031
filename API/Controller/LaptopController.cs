@@ -14,6 +14,7 @@ namespace API.Controller
     public class LaptopController : ControllerBase
     {
         private IAllRepositories<Laptop> _repo;
+
         private IAllRepositories<Category> _repoCat;
         private IAllRepositories<Producer> _repoPro;
         public LaptopController(IAllRepositories<Laptop> repo, IAllRepositories<Category> repoCat, IAllRepositories<Producer> repoPro)
@@ -23,14 +24,13 @@ namespace API.Controller
             _repoPro = repoPro;
         }
         [HttpGet]
-        [Route("Get-All-LapTop")]
+        [Route("get-all-lapTop")]
         public async Task<IActionResult> GetAllLaptop(int? page, int? Size)
         {
             var pageNumber = page ?? 1; // Trang hiện tại (mặc định là 1)
             var pageSize = Size ?? 10; // Số mục trên mỗi trang
 
             var results = await _repo.GetAllAsync();
-            if (results == null) return Ok("Data not available");
 
             var filteredResults = results.Where(result => result.Status == 1);
 
@@ -49,7 +49,7 @@ namespace API.Controller
             return Ok(response);
         }
         [HttpGet]
-        [Route("GetLaptopById/{id}")]
+        [Route("get-laptop-by-id/{id}")]
         public async Task<IActionResult> GetLaptopById(string id)
         {
             var result = await _repo.GetByIdAsync(id);
@@ -58,7 +58,7 @@ namespace API.Controller
         }
 
         [HttpPost]
-        [Route("Create_Laptop")]
+        [Route("create_laptop")]
         public async Task<IActionResult> CreateBattery([FromForm] CreateLaptop ccv)
         {
             if (!ModelState.IsValid)
@@ -84,14 +84,14 @@ namespace API.Controller
                 var result = await _repo.AddOneAsyn(cv);
                 return Ok(cv);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Create Fail");
             }
 
         }
         [HttpPost]
-        [Route("Update_Laptop/id")]
+        [Route("update_laptop/id")]
         public async Task<IActionResult> UpdateBattery(string id, [FromForm] UpdateLaptop ucv)
         {
             var result = await _repo.GetByIdAsync(id);
@@ -109,43 +109,46 @@ namespace API.Controller
             {
                 if (Pro.Status == 0 || Cat.Status == 0)
                 {
-                   return StatusCode(StatusCodes.Status400BadRequest, "Error Request");
+                    return StatusCode(StatusCodes.Status400BadRequest, "Error Request");
                 }
                 result.Name = ucv.Name;
                 result.Status = ucv.Status;
                 result.IdProducer = ucv.IdProducer;
-                result.Status = ucv.Status;
+                result.IdCat = ucv.IdCat;
                 try
                 {
                     await _repo.UpdateOneAsyn(result);
                     return Ok(result);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError, "Update Fail");
                 }
             }
         }
-        [HttpGet]
-        [Route("Delete_Laptop/{id}")]
+        [HttpDelete]
+        [Route("delete_laptop/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
             var result = await _repo.GetByIdAsync(id);
             if (result == null)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "lap do not Exist");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Laptop do not Exist");
             }
             else
             {
                 try
                 {
-                    await _repo.DeleteOneAsyn(result);
+                    result.Status = 0;
+                    await _repo.UpdateOneAsyn(result);
                     return Ok("Delete Successfully");
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError, "Delete Fail");
                 }
+
+
             }
         }
     }

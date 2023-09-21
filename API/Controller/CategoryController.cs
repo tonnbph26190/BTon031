@@ -12,20 +12,19 @@ namespace API.Controller
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        private IAllRepositories<Category> _repo;
+        private IAllRepositories<Category> _CategoryRepository;
         public CategoryController(IAllRepositories<Category> repo)
         {
-            _repo = repo;
+            _CategoryRepository = repo;
         }
         [HttpGet]
-        [Route("Get-All-Category")]
+        [Route("get-all-category")]
         public async Task<IActionResult> GetAllCategory(int? page, int? Size)
         {
             var pageNumber = page ?? 1; // Trang hiện tại (mặc định là 1)
             var pageSize = Size ?? 10; // Số mục trên mỗi trang
 
-            var results = await _repo.GetAllAsync();
-            if (results == null) return Ok("Data not available");
+            var results = await _CategoryRepository.GetAllAsync();
 
             var filteredResults = results.Where(result => result.Status == 1);
 
@@ -44,19 +43,23 @@ namespace API.Controller
             return Ok(response);
         }
         [HttpGet]
-        [Route("GetCategoryById/{id}")]
+        [Route("get-category-by-id/{id}")]
         public async Task<IActionResult> GetCategoryById(string id)
         {
-            var result = await _repo.GetByIdAsync(id);
+            var result = await _CategoryRepository.GetByIdAsync(id);
             if (result == null || result.Status == 0) return Ok("Category Do Not Exit");
             return Ok(result);
         }
 
         [HttpPost]
-        [Route("Create_Category")]
-        public async Task<IActionResult> CreateCategory([FromForm] CreateCategory ccv)
+        [Route("create-category")]
+        public async Task<IActionResult> CreateCategory([FromForm] CreateCategory CreateModel)
         {
-            var data = await _repo.GetAllAsync();
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, "Error repuest");
+            }
+            var data = await _CategoryRepository.GetAllAsync();
             var id = "CT" + Helper.GenerateRandomString(5);
             do
             {
@@ -66,24 +69,24 @@ namespace API.Controller
             {
                 ID = id,
                 Status=1,
-                Name= ccv.Name,
+                Name= CreateModel.Name,
             };
             try
             {
-                var result = await _repo.AddOneAsyn(cv);
+                var result = await _CategoryRepository.AddOneAsyn(cv);
                 return Ok(cv);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Create Fail");
             }
 
         }
         [HttpPost]
-        [Route("Update_Category/id")]
-        public async Task<IActionResult> UpdateCategory(string id, [FromForm] UpdateCategoryViewModel ucv)
+        [Route("update-category/id")]
+        public async Task<IActionResult> UpdateCategory(string id, [FromForm] UpdateCategoryViewModel UpdateModel)
         {
-            var result = await _repo.GetByIdAsync(id);
+            var result = await _CategoryRepository.GetByIdAsync(id);
             if (result == null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Category do not Exist");
@@ -94,14 +97,14 @@ namespace API.Controller
                 {
                     StatusCode(StatusCodes.Status400BadRequest, "Error Request");
                 }
-                result.Name = ucv.Name;
-                result.Status = ucv.Status;
+                result.Name = UpdateModel.Name;
+                result.Status = UpdateModel.Status;
                 try
                 {
-                    await _repo.UpdateOneAsyn(result);
+                    await _CategoryRepository.UpdateOneAsyn(result);
                     return Ok(result);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError, "Update không thành công");
                 }
@@ -110,11 +113,11 @@ namespace API.Controller
             }
 
         }
-        [HttpGet]
-        [Route("Delete/{id}")]
+        [HttpDelete]
+        [Route("delete/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var result = await _repo.GetByIdAsync(id);
+            var result = await _CategoryRepository.GetByIdAsync(id);
             if (result == null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Category do not Exist");
@@ -123,17 +126,16 @@ namespace API.Controller
             {
                 try
                 {
-                    await _repo.DeleteOneAsyn(result);
+                    result.Status = 0;
+                    await _CategoryRepository.UpdateOneAsyn(result);
                     return Ok("Delete Successfully");
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError, "Delete Fail");
                 }
-
-
             }
-        }   
+        }
     }
 }
 

@@ -19,14 +19,13 @@ namespace API.Controller
             _repo = repo;
         }
         [HttpGet]
-        [Route("Get-All-Main")]
+        [Route("get-all-main")]
         public async Task<IActionResult> GetAllMain(int? page, int? Size)
         {
             var pageNumber = page ?? 1; // Trang hiện tại (mặc định là 1)
             var pageSize = Size ?? 10; // Số mục trên mỗi trang
 
             var results = await _repo.GetAllAsync();
-            if (results == null) return Ok("Data not available");
 
             var filteredResults = results.Where(result => result.Status == 1);
 
@@ -45,7 +44,7 @@ namespace API.Controller
             return Ok(response);
         }
         [HttpGet]
-        [Route("GetMainById/{id}")]
+        [Route("get-main-by-id/{id}")]
         public async Task<IActionResult> GetMainById(string id)
         {
             var result = await _repo.GetByIdAsync(id);
@@ -54,7 +53,7 @@ namespace API.Controller
         }
 
         [HttpPost]
-        [Route("Create_Main")]
+        [Route("create-main")]
         public async Task<IActionResult> CreateMain([FromForm] CreateMain ccv)
         {
             if (!ModelState.IsValid)
@@ -79,14 +78,14 @@ namespace API.Controller
                 var result = await _repo.AddOneAsyn(cv);
                 return Ok(cv);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Create Fail");
             }
 
         }
         [HttpPost]
-        [Route("Update_Main/id")]
+        [Route("udate-main/id")]
         public async Task<IActionResult> UpdateMain(string id, [FromForm] UpdateMain ucv)
         {
             var result = await _repo.GetByIdAsync(id);
@@ -108,7 +107,7 @@ namespace API.Controller
                     await _repo.UpdateOneAsyn(result);
                     return Ok(result);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError, "Update Fail");
                 }
@@ -117,23 +116,24 @@ namespace API.Controller
             }
 
         }
-        [HttpGet]
-        [Route("Delete_Main/{id}")]
+        [HttpDelete]
+        [Route("delete-main/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
             var result = await _repo.GetByIdAsync(id);
             if (result == null)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Battery do not Exist");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Main Exist");
             }
             else
             {
                 try
                 {
-                    await _repo.DeleteOneAsyn(result);
+                    result.Status = 0;
+                    await _repo.UpdateOneAsyn(result);
                     return Ok("Delete Successfully");
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError, "Delete Fail");
                 }

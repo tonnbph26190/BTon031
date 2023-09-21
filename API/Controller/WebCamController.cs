@@ -18,14 +18,13 @@ namespace API.Controller
             _repo = repo;
         }
         [HttpGet]
-        [Route("Get-All-WebCam")]
-        public async Task<IActionResult> GetAllMain(int? page, int? Size)
+        [Route("get-all-webcam")]
+        public async Task<IActionResult> GetAllCam(int? page, int? Size)
         {
             var pageNumber = page ?? 1; // Trang hiện tại (mặc định là 1)
             var pageSize = Size ?? 10; // Số mục trên mỗi trang
 
             var results = await _repo.GetAllAsync();
-            if (results == null) return Ok("Data not available");
 
             var filteredResults = results.Where(result => result.Status == 1);
 
@@ -44,8 +43,8 @@ namespace API.Controller
             return Ok(response);
         }
         [HttpGet]
-        [Route("GetCamById/{id}")]
-        public async Task<IActionResult> GetRamById(string id)
+        [Route("get-cam-by-id/{id}")]
+        public async Task<IActionResult> GetCamById(string id)
         {
             var result = await _repo.GetByIdAsync(id);
             if (result == null || result.Status == 0) return Ok("Ram Do Not Exit");
@@ -53,7 +52,7 @@ namespace API.Controller
         }
 
         [HttpPost]
-        [Route("Create_Cam")]
+        [Route("create-cam")]
         public async Task<IActionResult> CreateCam([FromForm] CreateRam ccv)
         {
             if (!ModelState.IsValid)
@@ -78,14 +77,14 @@ namespace API.Controller
                 var result = await _repo.AddOneAsyn(cv);
                 return Ok(cv);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Create Fail");
             }
 
         }
         [HttpPost]
-        [Route("Update_Cam/id")]
+        [Route("update-cam/id")]
         public async Task<IActionResult> UpdateCam(string id, [FromForm] UpdateRam ucv)
         {
             var result = await _repo.GetByIdAsync(id);
@@ -107,7 +106,7 @@ namespace API.Controller
                     await _repo.UpdateOneAsyn(result);
                     return Ok(result);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError, "Update Fail");
                 }
@@ -116,23 +115,24 @@ namespace API.Controller
             }
 
         }
-        [HttpGet]
-        [Route("Delete_Cam/{id}")]
+        [HttpDelete]
+        [Route("delete-cam/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
             var result = await _repo.GetByIdAsync(id);
             if (result == null)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Ram do not Exist");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Cam do not Exist");
             }
             else
             {
                 try
                 {
-                    await _repo.DeleteOneAsyn(result);
+                    result.Status = 0;
+                    await _repo.UpdateOneAsyn(result);
                     return Ok("Delete Successfully");
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError, "Delete Fail");
                 }

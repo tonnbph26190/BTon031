@@ -19,14 +19,13 @@ namespace API.Controller
             _repo = repo;
         }
         [HttpGet]
-        [Route("Get-All-Ram")]
+        [Route("get-all-screen")]
         public async Task<IActionResult> GetAllScreen(int? page, int? Size)
         {
             var pageNumber = page ?? 1; // Trang hiện tại (mặc định là 1)
             var pageSize = Size ?? 10; // Số mục trên mỗi trang
 
             var results = await _repo.GetAllAsync();
-            if (results == null) return Ok("Data not available");
 
             var filteredResults = results.Where(result => result.Status == 1);
 
@@ -45,7 +44,7 @@ namespace API.Controller
             return Ok(response);
         }
         [HttpGet]
-        [Route("GetRamById/{id}")]
+        [Route("get-screen-by-id/{id}")]
         public async Task<IActionResult> GetScreenById(string id)
         {
             var result = await _repo.GetByIdAsync(id);
@@ -54,7 +53,7 @@ namespace API.Controller
         }
 
         [HttpPost]
-        [Route("Create_Screen")]
+        [Route("create-screen")]
         public async Task<IActionResult> CreateScreen([FromForm] CreatScreen ccv)
         {
             if (!ModelState.IsValid)
@@ -80,14 +79,14 @@ namespace API.Controller
                 var result = await _repo.AddOneAsyn(cv);
                 return Ok(cv);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Create Fail");
             }
 
         }
         [HttpPost]
-        [Route("Update_Screen/id")]
+        [Route("update-screen/id")]
         public async Task<IActionResult> UpdateRam(string id, [FromForm] UpdateScreen ucv)
         {
             var result = await _repo.GetByIdAsync(id);
@@ -110,7 +109,7 @@ namespace API.Controller
                     await _repo.UpdateOneAsyn(result);
                     return Ok(result);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError, "Update Fail");
                 }
@@ -119,8 +118,8 @@ namespace API.Controller
             }
 
         }
-        [HttpGet]
-        [Route("Delete_Screen/{id}")]
+        [HttpDelete]
+        [Route("delete-screen/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
             var result = await _repo.GetByIdAsync(id);
@@ -132,10 +131,11 @@ namespace API.Controller
             {
                 try
                 {
-                    await _repo.DeleteOneAsyn(result);
+                    result.Status = 0;
+                    await _repo.UpdateOneAsyn(result);
                     return Ok("Delete Successfully");
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError, "Delete Fail");
                 }

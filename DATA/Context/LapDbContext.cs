@@ -41,5 +41,15 @@ namespace DATA.Context
         public DbSet<SSD> SSDs { get; set; }
         public DbSet<VGA> VGAs { get; set; }
         public DbSet<Webcam> Webcams { get; set; }
+        public DbSet<PC> PCs { get; set; }
+        public DbSet<PcDetail> PcDetails { get; set; }
+        public DbSet<Custom> Customs { get; set; }
+        public DbSet<Case> Cases { get; set; }
+        public DbSet<Power> Powers { get; set; }
+        public DbSet<Cooling> Coolings { get; set; }
+        public DbSet<MonitorDetail> MnitorDetails { get; set; }
+        public DbSet<Panel> Panels { get; set; }
+        public DbSet<Resolution> Resolutions { get; set; }
+        public DbSet<DATA.Entity.Monitor> Monitors { get; set; }
     }
 }

@@ -2,12 +2,15 @@
 
 namespace API.ViewModel.LatopDetailViewModel
 {
-    public class CreateLaptopViewModel
+    public class CreateLaptopViewModel:ILaptopDetailViewModel
     {
+        [Required]
         [RegularExpression(@"^-?\d+(\.\d+)?$")]
         public decimal COGS { get; set; }
+        [Required]
         [RegularExpression(@"^-?\d+(\.\d+)?$")]
         public decimal Price { get; set; }
+        [Required]
         [RegularExpression(@"^-?\d+$")]
         public int Quatity { get; set; }
         [Required]
@@ -36,7 +39,7 @@ namespace API.ViewModel.LatopDetailViewModel
         public string IdCam { get; set; }
         [Required]
         [StringLength(30)]
-        public string IdScren { get; set; }
+        public string IdScreen { get; set; }
         [Required]
         [StringLength(30)]
         public string IdLap { get; set; }

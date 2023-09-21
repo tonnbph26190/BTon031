@@ -2,7 +2,7 @@
 
 namespace API.ViewModel.LatopDetailViewModel
 {
-    public class UpdateLaptopDetailViewModel
+    public class UpdateLaptopDetailViewModel:ILaptopDetailViewModel
     {
         [Required]
         [StringLength(20)]
@@ -42,9 +42,10 @@ namespace API.ViewModel.LatopDetailViewModel
         public string IdCam { get; set; }
         [Required]
         [StringLength(30)]
-        public string IdScren { get; set; }
+        public string IdScreen { get; set; }
         [Required]
         [StringLength(30)]
         public string IdLap { get; set; }
+       
     }
 }

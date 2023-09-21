@@ -19,14 +19,13 @@ namespace API.Controller
             _repo = repo;
         }
         [HttpGet]
-        [Route("Get-All-Producer")]
+        [Route("get-all-producer")]
         public async Task<IActionResult> GetAllProducer(int? page, int? Size)
         {
             var pageNumber = page ?? 1; // Trang hiện tại (mặc định là 1)
             var pageSize = Size ?? 10; // Số mục trên mỗi trang
 
             var results = await _repo.GetAllAsync();
-            if (results == null) return Ok("Data not available");
 
             var filteredResults = results.Where(result => result.Status == 1);
 
@@ -45,7 +44,7 @@ namespace API.Controller
             return Ok(response);
         }
         [HttpGet]
-        [Route("GetProducerById/{id}")]
+        [Route("get-producer-by-id/{id}")]
         public async Task<IActionResult> GetProducerById(string id)
         {
             var result = await _repo.GetByIdAsync(id);
@@ -54,9 +53,13 @@ namespace API.Controller
         }
 
         [HttpPost]
-        [Route("Create_Producer")]
+        [Route("create-producer")]
         public async Task<IActionResult> CreateProducer([FromForm] CreateProducer ccv)
         {
+            if (!ModelState.IsValid)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, "Create Fail");
+            }
             var data = await _repo.GetAllAsync();
             var id = "P" + Helper.GenerateRandomString(5);
             do
@@ -74,14 +77,13 @@ namespace API.Controller
                 var result = await _repo.AddOneAsyn(cv);
                 return Ok(cv);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Create Fail");
             }
-
         }
         [HttpPost]
-        [Route("Update_Producer/id")]
+        [Route("update-producer/id")]
         public async Task<IActionResult> UpdateProducer(string id, [FromForm] UpdateCategoryViewModel ucv)
         {
             var result = await _repo.GetByIdAsync(id);
@@ -102,32 +104,31 @@ namespace API.Controller
                     await _repo.UpdateOneAsyn(result);
                     return Ok(result);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError, "Update không thành công");
                 }
-
-
             }
 
         }
-        [HttpGet]
-        [Route("Delete_Producer/{id}")]
+        [HttpDelete]
+        [Route("delete-producer/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
             var result = await _repo.GetByIdAsync(id);
             if (result == null)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Category do not Exist");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Producer do not Exist");
             }
             else
             {
                 try
                 {
-                    await _repo.DeleteOneAsyn(result);
+                    result.Status = 0;
+                    await _repo.UpdateOneAsyn(result);
                     return Ok("Delete Successfully");
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError, "Delete Fail");
                 }

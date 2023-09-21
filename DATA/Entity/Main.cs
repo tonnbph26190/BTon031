@@ -20,5 +20,7 @@ namespace DATA.Entity
         [MaxLength(50)]
         public string? Parameter { get; set; }
         public ICollection<Laptop_Detail> Laptop_Detail { get; set; }
+        public ICollection<PcDetail> PcDetails { get; set; }
+
     }
 }

@@ -2,8 +2,12 @@
 
 namespace API.ViewModel.LatopDetailViewModel
 {
-    public class ViewLaptopDetail
+    public class LaptopDetailDto
     {
+
+        [Required]
+        [StringLength(20)]
+        public string ID { get; set; }
         [Required]
         [StringLength(20)]
         public string Seri { get; set; }
@@ -15,19 +19,19 @@ namespace API.ViewModel.LatopDetailViewModel
         public int Quatity { get; set; }
         [Required]
         [StringLength(30)]
-        public string NameSSD { get; set; }
+        public string SSDName { get; set; }
         [Required]
         [StringLength(30)]
-        public string NameRam { get; set; }
+        public string RamName { get; set; }
         [Required]
         [StringLength(30)]
-        public string NameVga { get; set; }
+        public string VgaName { get; set; }
         [Required]
         [StringLength(30)]
-        public string NameBattery { get; set; }
+        public string BatteryName { get; set; }
         [Required]
         [StringLength(30)]
-        public string NameMain { get; set; }
+        public string MainName { get; set; }
         [RegularExpression(@"^-?\d+(\.\d+)?$")]
         public decimal Weight { get; set; }
         [RegularExpression(@"^-?\d+(\.\d+)?$")]
@@ -36,13 +40,13 @@ namespace API.ViewModel.LatopDetailViewModel
         public decimal leght { get; set; }
         [Required]
         [StringLength(30)]
-        public string NameCam { get; set; }
+        public string CamName { get; set; }
         [Required]
         [StringLength(30)]
-        public string NameScren { get; set; }
+        public string ScreenName { get; set; }
         [Required]
         [StringLength(30)]
-        public string NameLap { get; set; }
+        public string LaptopName { get; set; }
         [Required]
         [StringLength(100)]
         public string Name { get; set; }
@@ -59,8 +63,8 @@ namespace API.ViewModel.LatopDetailViewModel
         public string SSDPara { get; set; }
         public string ScreenSize { get; set; }
         public string ScreenRate { get; set; }
-        public string  NameCat { get; set; }
-        public string  NamePro { get; set; }
+        public string  CategoryName { get; set; }
+        public string  ProducerName { get; set; }
 
 
     }
