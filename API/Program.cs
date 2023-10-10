@@ -18,7 +18,8 @@ builder.Services.AddScoped(typeof(IAllRepositories<>), typeof(AllRepositories<>)
 builder.Services.AddScoped<IPcDetailService, PcDetailService>();
 builder.Services.AddScoped<ILapTopDetailService, LapTopDetailService>();
 builder.Services.AddScoped<IMonitorDetailService, MonitorDetailService>();
-
+builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

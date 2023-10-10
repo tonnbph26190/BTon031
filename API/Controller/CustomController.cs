@@ -55,7 +55,7 @@ namespace API.Controller
 
         [HttpPost]
         [Route("create-custom")]
-        public async Task<IActionResult> Create(CreateViewModel CreateModel)
+        public async Task<IActionResult> Create(CreateCustomViewModel CreateModel)
         {
             if (!ModelState.IsValid)
             {
@@ -72,12 +72,15 @@ namespace API.Controller
             {
                 ID = id,
                 Name = CreateModel.Name,
-                Value = CreateModel.Values,
+                Value = CreateModel.Value,
+                Price= CreateModel.Price,
+                COGS= CreateModel.COGS,
+                Quatity= CreateModel.Quatity,
                 Status = 1
             };
             try
             {
-                var result = await _CustomRepository.AddOneAsyn(cv);
+                var result = await _CustomRepository.AddOneAsync(cv);
                 return Ok(cv);
             }
             catch (Exception)
@@ -86,9 +89,9 @@ namespace API.Controller
             }
 
         }
-        [HttpPost]
+        [HttpPut]
         [Route("update-custom/id")]
-        public async Task<IActionResult> Update(string id, UpdateViewModel UpdateModel)
+        public async Task<IActionResult> Update(string id, UpdateCustomViewModel UpdateModel)
         {
             var result = await _CustomRepository.GetByIdAsync(id);
             if (result == null)
@@ -103,10 +106,13 @@ namespace API.Controller
                 }
                 result.Name = UpdateModel.Name;
                 result.Status = UpdateModel.Status;
-                result.Value = UpdateModel.Values;
+                result.Value = UpdateModel.Value;
+                result.COGS = UpdateModel.COGS;
+                result.Price = UpdateModel.Price;
+                result.Quatity= UpdateModel.Quatity;
                 try
                 {
-                    await _CustomRepository.UpdateOneAsyn(result);
+                    await _CustomRepository.UpdateOneAsync(result);
                     return Ok(result);
                 }
                 catch (Exception)
@@ -132,7 +138,7 @@ namespace API.Controller
                 try
                 {
                     result.Status = 0;
-                    await _CustomRepository .UpdateOneAsyn(result);
+                    await _CustomRepository .UpdateOneAsync(result);
                     return Ok("Delete Successfully");
                 }
                 catch (Exception)

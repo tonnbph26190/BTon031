@@ -11,6 +11,7 @@ namespace DATA.Entity
     {
         [Required]
         [StringLength(30)]
+        [Key]
         public string ID { get; set; }
         [Required]
         [StringLength(50)]

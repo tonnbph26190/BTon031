@@ -6,6 +6,7 @@ using Data.IRepositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PagedList;
+using API.ViewModel.CoolingViewModel;
 
 namespace API.Controller
 {
@@ -48,17 +49,17 @@ namespace API.Controller
         public async Task<IActionResult> GetById(string id)
         {
             var result = await _CoolingRepository.GetByIdAsync(id);
-            if (result == null || result.Status == 0) return Ok("Cooling Do Not Exit");
+            if (result == null || result.Status == 0) return BadRequest("Cooling Do Not Exit");
             return Ok(result);
         }
 
         [HttpPost]
         [Route("create-cooling")]
-        public async Task<IActionResult> Create(CreateViewModel CreateModel)
+        public async Task<IActionResult> Create(CreateCoolingViewModel CreateModel)
         {
             if (!ModelState.IsValid)
             {
-                StatusCode(StatusCodes.Status400BadRequest, "Error Request");
+               return StatusCode(StatusCodes.Status400BadRequest, "Error Request");
             }
             var id = "Col" + Helper.GenerateRandomString(5);
             Cooling ex = new Cooling();
@@ -71,12 +72,15 @@ namespace API.Controller
             {
                 ID = id,
                 Name = CreateModel.Name,
-                Value = CreateModel.Values,
+                Value = CreateModel.Value,
+                Price= CreateModel.Price,
+                COGS=CreateModel.COGS,
+                Quatity=CreateModel.Quatity,
                 Status = 1
             };
             try
             {
-                var result = await _CoolingRepository.AddOneAsyn(NewObj);
+                var result = await _CoolingRepository.AddOneAsync(NewObj);
                 return Ok(NewObj);
             }
             catch (Exception)
@@ -85,9 +89,9 @@ namespace API.Controller
             }
 
         }
-        [HttpPost]
+        [HttpPut]
         [Route("update-cooling/id")]
-        public async Task<IActionResult> Update(string id, UpdateViewModel UpdateModel)
+        public async Task<IActionResult> Update(string id, UpdateCoolingViewModel UpdateModel)
         {
             var result = await _CoolingRepository.GetByIdAsync(id);
             if (result == null)
@@ -102,10 +106,13 @@ namespace API.Controller
                 }
                 result.Name = UpdateModel.Name;
                 result.Status = UpdateModel.Status;
-                result.Value = UpdateModel.Values;
+                result.Value = UpdateModel.Value    ;
+                result.COGS=UpdateModel.COGS;
+                result.Quatity=UpdateModel.Quatity;
+                result.Price= UpdateModel.Price;
                 try
                 {
-                    await _CoolingRepository.UpdateOneAsyn(result);
+                    await _CoolingRepository.UpdateOneAsync(result);
                     return Ok(result);
                 }
                 catch (Exception)
@@ -131,7 +138,7 @@ namespace API.Controller
                 try
                 {
                     result.Status = 0;
-                    await _CoolingRepository.UpdateOneAsyn(result);
+                    await _CoolingRepository.UpdateOneAsync(result);
                     return Ok("Delete Successfully");
                 }
                 catch (Exception)

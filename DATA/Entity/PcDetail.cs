@@ -18,10 +18,6 @@ namespace DATA.Entity
         [Required]
         [StringLength(20)]
         public string Seri { get; set; }
-        [RegularExpression(@"^-?\d+(\.\d+)?$")]
-        public decimal COGS { get; set; }
-        [RegularExpression(@"^-?\d+(\.\d+)?$")]
-        public decimal Price { get; set; }
         [RegularExpression(@"^-?\d+$")]
         [Range(0, 5, ErrorMessage = "Trạng thái phải từ 0 đến 5")]
         public int Status { get; set; }
@@ -62,6 +58,7 @@ namespace DATA.Entity
         public Power? Power { get; set; }
         public Cooling? cooling { get; set; }
         public Custom? Custom { get; set; }
+        public virtual ICollection<OrderDetail> OrderDetails { get; set; }
 
     }
 }

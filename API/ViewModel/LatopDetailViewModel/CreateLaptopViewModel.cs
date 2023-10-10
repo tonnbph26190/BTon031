@@ -5,9 +5,11 @@ namespace API.ViewModel.LatopDetailViewModel
     public class CreateLaptopViewModel:ILaptopDetailViewModel
     {
         [Required]
+        [Range(100000, int.MaxValue)]
         [RegularExpression(@"^-?\d+(\.\d+)?$")]
         public decimal COGS { get; set; }
         [Required]
+        [Range(100000, int.MaxValue)]
         [RegularExpression(@"^-?\d+(\.\d+)?$")]
         public decimal Price { get; set; }
         [Required]

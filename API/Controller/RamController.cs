@@ -13,19 +13,19 @@ namespace API.Controller
     [ApiController]
     public class RamController : ControllerBase
     {
-        private IAllRepositories<Ram> _repo;
+        private IAllRepositories<Ram> _RamRepository;
         public RamController(IAllRepositories<Ram> repo)
         {
-            _repo = repo;
+            _RamRepository = repo;
         }
         [HttpGet]
         [Route("get-all-ram")]
-        public async Task<IActionResult> GetAllRam(int? page, int? Size)
+        public async Task<IActionResult> GetAllRam(int page=1, int Size = 10)
         {
-            var pageNumber = page ?? 1; // Trang hiện tại (mặc định là 1)
-            var pageSize = Size ?? 10; // Số mục trên mỗi trang
+            var pageNumber = page; // Trang hiện tại (mặc định là 1)
+            var pageSize = Size; // Số mục trên mỗi trang
 
-            var results = await _repo.GetAllAsync();
+            var results = await _RamRepository.GetAllAsync();
 
             var filteredResults = results.Where(result => result.Status == 1);
 
@@ -47,36 +47,43 @@ namespace API.Controller
         [Route("get-ram-by-id/{id}")]
         public async Task<IActionResult> GetRamById(string id)
         {
-            var result = await _repo.GetByIdAsync(id);
+            var result = await _RamRepository.GetByIdAsync(id);
             if (result == null || result.Status == 0) return Ok("Ram Do Not Exit");
             return Ok(result);
         }
 
         [HttpPost]
         [Route("create-ram")]
-        public async Task<IActionResult> CreateRam([FromForm] CreateRam ccv)
+        public async Task<IActionResult> CreateRam([FromForm] CreateRam Create)
         {
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, "Create Fail");
             }
-            var data = await _repo.GetAllAsync();
+            var data = await _RamRepository.GetAllAsync();
             var id = "R" + Helper.GenerateRandomString(5);
             do
             {
                 id = "R" + Helper.GenerateRandomString(5);
             } while (data.Any(c => c.ID == id));
-            Ram cv = new Ram()
+            Ram NewObj = new Ram()
             {
                 ID = id,
-                Name = ccv.Name,
-                Parameter = ccv.Parameter,
-                Status = 1
+                Name = Create.Name,
+                Parameter = Create.Parameter,
+                Status = 1,
+                Type= Create.Type,
             };
+            if (Create.Type==2)
+            {
+                NewObj.Quatity = Create.Quatity;
+                NewObj.Price= Create.Price;
+                NewObj.COGS = Create.COGS;
+            }
             try
             {
-                var result = await _repo.AddOneAsyn(cv);
-                return Ok(cv);
+                var result = await _RamRepository.AddOneAsync(NewObj);
+                return Ok(NewObj);
             }
             catch (Exception)
             {
@@ -84,11 +91,11 @@ namespace API.Controller
             }
 
         }
-        [HttpPost]
+        [HttpPut]
         [Route("update-ram/id")]
-        public async Task<IActionResult> UpdateRam(string id, [FromForm] UpdateRam ucv)
+        public async Task<IActionResult> UpdateRam(string id, [FromForm] UpdateRam UpdateObj)
         {
-            var result = await _repo.GetByIdAsync(id);
+            var result = await _RamRepository.GetByIdAsync(id);
             if (result == null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Ram do not Exist");
@@ -99,12 +106,19 @@ namespace API.Controller
                 {
                     StatusCode(StatusCodes.Status400BadRequest, "Error Request");
                 }
-                result.Name = ucv.Name;
-                result.Status = ucv.Status;
-                result.Parameter = ucv.Parameter;
+                result.Name = UpdateObj.Name;
+                result.Status = UpdateObj.Status;
+                result.Parameter = UpdateObj.Parameter;
+                result.Type= UpdateObj.Type;
+                if (UpdateObj.Type==2)
+                {
+                    result.COGS = UpdateObj.COGS;
+                    result.Price = UpdateObj.Price;
+                    result.Quatity = UpdateObj.Quatity;
+                }
                 try
                 {
-                    await _repo.UpdateOneAsyn(result);
+                    await _RamRepository.UpdateOneAsync(result);
                     return Ok(result);
                 }
                 catch (Exception)
@@ -120,7 +134,7 @@ namespace API.Controller
         [Route("delete-ram/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var result = await _repo.GetByIdAsync(id);
+            var result = await _RamRepository.GetByIdAsync(id);
             if (result == null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Ram do not Exist");
@@ -130,7 +144,7 @@ namespace API.Controller
                 try
                 {
                     result.Status = 0;
-                    await _repo.UpdateOneAsyn(result);
+                    await _RamRepository.UpdateOneAsync(result);
                     return Ok("Delete Successfully");
                 }
                 catch (Exception)

@@ -47,9 +47,11 @@ namespace DATA.Context
         public DbSet<Case> Cases { get; set; }
         public DbSet<Power> Powers { get; set; }
         public DbSet<Cooling> Coolings { get; set; }
-        public DbSet<MonitorDetail> MnitorDetails { get; set; }
+        public DbSet<MonitorDetail> MONITORDETAILS { get; set; }
         public DbSet<Panel> Panels { get; set; }
         public DbSet<Resolution> Resolutions { get; set; }
+        public DbSet<Order> Order { get; set; }
+        public DbSet<OrderDetail> OrderDetail  { get; set; }
         public DbSet<DATA.Entity.Monitor> Monitors { get; set; }
     }
 }

@@ -24,10 +24,10 @@ namespace API.Controller
         }
         [HttpGet]
         [Route("get-all")]
-        public async Task<IActionResult> GetAll(int? page, int? Size)
+        public async Task<IActionResult> GetAll(int page=1, int Size = 10)
         {
-            var pageNumber = page ?? 1; // Trang hiện tại (mặc định là 1)
-            var pageSize = Size ?? 10; // Số mục trên mỗi trang
+            var pageNumber = page; // Trang hiện tại (mặc định là 1)
+            var pageSize = Size; // Số mục trên mỗi trang
 
             var results = await _PcRepository.GetAllAsync();
 
@@ -76,11 +76,11 @@ namespace API.Controller
                 Name = CreateModel.Name,
                 CatId = CreateModel.IdCat,
                 ProducerId = CreateModel.IdProducer,
-                Status = 1
+                Status = 1,
             };
             try
             {
-                var result = await _PcRepository.AddOneAsyn(cv);
+                var result = await _PcRepository.AddOneAsync(cv);
                 return Ok(cv);
             }
             catch (Exception)
@@ -89,7 +89,7 @@ namespace API.Controller
             }
 
         }
-        [HttpPost]
+        [HttpPut]
         [Route("update_pc/id")]
         public async Task<IActionResult> Update(string id, UpdateLaptop UpdateModel)
         {
@@ -116,7 +116,7 @@ namespace API.Controller
                 result.CatId = UpdateModel.IdCat;
                 try
                 {
-                    await _PcRepository.UpdateOneAsyn(result);
+                    await _PcRepository.UpdateOneAsync(result);
                     return Ok(result);
                 }
                 catch (Exception)
@@ -139,7 +139,7 @@ namespace API.Controller
                 try
                 {
                     result.Status = 0;
-                    await _PcRepository.UpdateOneAsyn(result);
+                    await _PcRepository.UpdateOneAsync(result);
                     return Ok("Delete Successfully");
                 }
                 catch (Exception)

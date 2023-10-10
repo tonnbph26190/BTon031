@@ -7,6 +7,7 @@ using PagedList;
 using API.ViewModel.MonitorViewModel;
 using API.Extensions;
 using System.DirectoryServices.Protocols;
+using AutoMapper;
 
 namespace API.Controller
 {
@@ -14,30 +15,23 @@ namespace API.Controller
     [ApiController]
     public class MonitorDetailController : ControllerBase
     {
-        private IAllRepositories<Producer> _ProducerRepository;
-        private IAllRepositories<Category> _CategoryRepository;
-        private IAllRepositories<DATA.Entity.Monitor> _MonitorRepository;
         private IAllRepositories<MonitorDetail> _MonitorDetailRepository;
-        private IAllRepositories<Panel> _PanelRepository;
-        private IAllRepositories<Resolution> _ResolutionRepository;
         private IMonitorDetailService _Service;
-        public MonitorDetailController(IAllRepositories<Producer> producerRepository, IAllRepositories<Category> categoryRepository, IAllRepositories<DATA.Entity.Monitor> monitorRepository, IAllRepositories<MonitorDetail> monitorDetailRepository, IMonitorDetailService Service)
+        public MonitorDetailController(IAllRepositories<MonitorDetail> monitorDetailRepository, IMonitorDetailService Service)
         {
-            _ProducerRepository = producerRepository;
-            _CategoryRepository = categoryRepository;
-            _MonitorRepository = monitorRepository;
             _MonitorDetailRepository = monitorDetailRepository;
             _Service = Service;
         }
+
         [HttpGet]
         [Route("get-all-monitor-detail-page")]
-        public async Task<IActionResult> GetAllLaptopDetailPage(int page = 1, int Size = 10)
+        public async Task<IActionResult> GetAllPage(int page = 1, int Size = 10)
         {
             var pageNumber = page; // Trang hiện tại (mặc định là 1)
             var pageSize = Size; // Số mục trên mỗi trang
             var list = await _Service.GetAll();
-            if (list == null)
-                return Ok("Data not available");
+            if (list.Count() == 0)
+                return BadRequest("Data not available");
             var totalCount = list.Count();
             var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
             var pagedResults = list.ToPagedList(pageNumber, pageSize);
@@ -49,53 +43,27 @@ namespace API.Controller
             };
             return Ok(response);
         }
+
         [HttpGet]
         [Route("get-monitor-detail-by-id/{id}")]
-        public async Task<IActionResult> GeById(string id)
+        public async Task<IActionResult> GetById(string id)
         {
             var list = await _Service.GetAll();
             var result = list.Where(c => c.ID == id).FirstOrDefault();
 
-            if (result == null || result.Status == 0) return Ok("Category Do Not Exit");
+            if (result == null || result.Status == 0) return BadRequest("Category Do Not Exit");
             return Ok(result);
         }
+
         [HttpGet]
         [Route("find-monitor-detail")]
         public async Task<IActionResult> Find(decimal? from, decimal? to, string? search, int? status)
         {
-            var listProductDetail = await _Service.GetAll();
-            if (!string.IsNullOrEmpty(search))
-            {
-                var Find = search.Trim().ToLower();
-                listProductDetail = listProductDetail.Where(x => x.Name.ToLower().Contains(Find) || x.ProducreName.ToLower().Trim().Contains(Find) || x.CatgoryName.Contains(Find));
-            }
-            if (from.HasValue)
-            {
-                listProductDetail = listProductDetail.Where(x => x.Price >= from);
-            }
-            if (to.HasValue)
-            {
-                listProductDetail = listProductDetail.Where(x => x.Price <= to);
-            }
-            if (status.HasValue)
-            {
-                listProductDetail = listProductDetail.Where(x => x.Status == status);
-            }
-            if (from.HasValue && to.HasValue && !string.IsNullOrEmpty(search))
-            {
-                var Find = search.Trim().ToLower();
-                listProductDetail = listProductDetail.Where(x => x.Price >= from && x.Price <= to && x.Name.ToLower().Contains(Find));
-            }
-            if (from.HasValue && to.HasValue && !string.IsNullOrEmpty(search) && status.HasValue)
-            {
-                var Find = search.Trim().ToLower();
-                listProductDetail = listProductDetail.Where(x => x.Price >= from && x.Price <= to && x.Name.ToLower().Trim().Contains(Find) || x.ProducreName.ToLower().Trim().Contains(Find) || x.CatgoryName.ToLower().Trim().Contains(Find) && x.Status == status);
-            }
-
-            return Ok(listProductDetail);
+            return Ok(await _Service.SearchProductDetails(search, from, to, status));
         }
+
         [HttpDelete]
-        [Route("delete-laptopdetail/{id}")]
+        [Route("delete-laptop-detail/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
             var result = await _MonitorDetailRepository.GetByIdAsync(id);
@@ -108,116 +76,67 @@ namespace API.Controller
                 try
                 {
                     result.Status = 0;
-                    await _MonitorDetailRepository.UpdateOneAsyn(result);
+                    await _MonitorDetailRepository.UpdateOneAsync(result);
                     return Ok("Delete Successfully");
                 }
                 catch (Exception)
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError, "Delete Fail");
                 }
-
-
             }
         }
+
         [HttpPost]
         [Route("create-monitor-detail")]
         public async Task<IActionResult> Create(CreateMonitorViewModel create)
         {
-            if (!ModelState.IsValid || create.COGS > create.Price)
+            if (!ModelState.IsValid || create.COGS > create.Price || create.Quatity <= 0)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, "Error Request");
             }
 
-            var Monitor = await _MonitorRepository.GetByIdAsync(create.MonitorID);
-            var Panel = await _PanelRepository.GetByIdAsync(create.PanelID);
-            var Resolution = await _ResolutionRepository.GetByIdAsync(create.ResolutionID);
-            if (Monitor.Status == 0 || Panel.Status == 0 || Resolution.Status == 0)
+
+            if (await _Service.ValidateMonitorPanelResolutionAsync(create))
             {
                 return StatusCode(StatusCodes.Status400BadRequest, "Error Request");
             }
 
-            var data = await _MonitorDetailRepository.GetAllAsync();
-            var id = "MNDT" + Helper.GenerateRandomString(5);
-            var seri = Helper.GenerateRandomString(8);
+            var serviceResult = await _Service.CreateMonitorDetail(create);
 
-            do
+            if (serviceResult.IsSuccess)
             {
-                id = "MNDT" + Helper.GenerateRandomString(5);
-                seri = Helper.GenerateRandomString(8);
-            } while (data.Any(c => c.ID == id || c.Seri == seri));
-
-            MonitorDetail monitorDetail = new MonitorDetail()
-            {
-                ID = id,
-                Seri = seri,
-                Price = create.Price,
-                COGS = create.COGS,
-                Quatity = create.Quatity,
-                Status = 1,
-                Brightness = create.Brightness,
-                Inch = create.Inch,
-                Rate = create.Rate,
-                Display = create.Display,
-                Description = create.Description,
-                PanelID = create.PanelID,
-                ResolutionID = create.ResolutionID,
-                MonitorID = create.MonitorID,
-                Speaker = create.Speaker,
-            };
-            try
-            {
-                var result = await _MonitorDetailRepository.AddOneAsyn(monitorDetail);
-                return Ok(monitorDetail);
+                return Ok(serviceResult.Data);
             }
-            catch (Exception)
+            else
             {
-
-                return StatusCode(StatusCodes.Status500InternalServerError, "Create Fail");
+                return StatusCode(StatusCodes.Status500InternalServerError, serviceResult.ErrorMessage);
             }
+
         }
-        [HttpPost]
+
+        [HttpPut]
         [Route("update-monitor-detail/id")]
         public async Task<IActionResult> Update(string id, UpdateMonitorViewModel update)
         {
-            var result = await _MonitorDetailRepository.GetByIdAsync(id);
-            if (result == null)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Category do not Exist");
-            }
-            if (!ModelState.IsValid || update.COGS > update.Price)
+            if (!ModelState.IsValid || update.COGS > update.Price || update.Quatity <= 0)
             {
                 StatusCode(StatusCodes.Status400BadRequest, "Error Request");
             }
 
-            var Monitor = await _MonitorRepository.GetByIdAsync(update.MonitorID);
-            var Panel = await _PanelRepository.GetByIdAsync(update.PanelID);
-            var Resolution = await _ResolutionRepository.GetByIdAsync(update.ResolutionID);
-            if (Monitor.Status == 0 || Panel.Status == 0 || Resolution.Status == 0)
+            if (await _Service.ValidateMonitorPanelResolutionAsync(update))
             {
                 return StatusCode(StatusCodes.Status400BadRequest, "Error Request");
             }
 
-            result.Price = update.Price;
-            result.COGS = update.COGS;
-            result.Quatity = update.Quatity;
-            result.Status = update.Status;
-            result.Brightness = update.Brightness;
-            result.Inch = update.Inch;
-            result.Rate = update.Rate;
-            result.Display = update.Display;
-            result.Description = update.Description;
-            result.PanelID = update.PanelID;
-            result.ResolutionID = update.ResolutionID;
-            result.MonitorID = update.MonitorID;
-            result.Speaker = update.Speaker;
-            try
+            var serviceResult = await _Service.UpdateMonitorDetail(id,update);
+
+            if (serviceResult.IsSuccess)
             {
-                await _MonitorDetailRepository.UpdateOneAsyn(result);
-                return Ok(result);  
+                return Ok(serviceResult.Data);
             }
-            catch (Exception)
+            else
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Update Fail");
+                return StatusCode(StatusCodes.Status500InternalServerError, serviceResult.ErrorMessage);
             }
         }
 

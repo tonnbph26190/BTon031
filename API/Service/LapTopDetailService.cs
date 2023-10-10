@@ -2,6 +2,9 @@
 using API.ViewModel.LatopDetailViewModel;
 using DATA.Entity;
 using Data.IRepositories;
+using Microsoft.AspNetCore.Mvc;
+using API.Extensions;
+using API.ServiceResult;
 
 namespace API.Service
 {
@@ -94,12 +97,20 @@ namespace API.Service
             var Screen = await _ScreenRepositoty.GetByIdAsync(monitorViewModel.IdScreen);
             var VGA = await _VGARepositoty.GetByIdAsync(monitorViewModel.IdVga);
 
-            if (Ram.Status == 0 || SSD.Status == 0 || Battery.Status == 0 || Cam.Status == 0 || Lap.Status == 0 || Main.Status == 0 || Screen.Status == 0 || VGA.Status == 0)
-            {
-                return true;
-            }
+            bool isAnyComponentInvalid = Ram.Status == 0 ||
+                                         SSD.Status == 0 ||
+                                         Battery.Status == 0 ||
+                                         Cam.Status == 0 ||
+                                         Lap.Status == 0 ||
+                                         Main.Status == 0 ||
+                                         Screen.Status == 0 ||
+                                         VGA.Status == 0 ||
+                                         VGA.Type != 1 ||
+                                         SSD.Type != 1 ||
+                                         Ram.Type != 1 ||
+                                         Main.Type != 1;
 
-            return false;
+            return isAnyComponentInvalid;
         }
         public async Task<Laptop_Detail> FindExistingDetailAsync(ILaptopDetailViewModel model)
         {
@@ -120,6 +131,151 @@ namespace API.Service
                 x.Hight== model.Hight);
 
             return existingDetail;
+        }
+
+        public async Task<IEnumerable<LaptopDetailDto>> FilterProductDetails(string? search, decimal? from, decimal? to, int? status)
+        {
+            var listProductDetail = await GetAllLaptopDetail();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                var Find = search.Trim().ToLower();
+                listProductDetail = listProductDetail.Where(
+                    x => x.Name.ToLower().Contains(Find)
+                    || x.ProducerName.ToLower().Trim().Contains(Find)
+                    || x.CategoryName.Contains(Find));
+            }
+
+            if (from.HasValue)
+            {
+                listProductDetail = listProductDetail.Where(x => x.Price >= from);
+            }
+
+            if (to.HasValue)
+            {
+                listProductDetail = listProductDetail.Where(x => x.Price <= to);
+            }
+
+            if (status.HasValue)
+            {
+                listProductDetail = listProductDetail.Where(x => x.Status == status);
+            }
+
+            if (from.HasValue && to.HasValue && !string.IsNullOrEmpty(search))
+            {
+                var Find = search.Trim().ToLower();
+                listProductDetail = listProductDetail.Where(x => x.Price >= from
+                && x.Price <= to
+                && x.Name.ToLower().Contains(Find));
+            }
+
+            if (from.HasValue && to.HasValue && !string.IsNullOrEmpty(search) && status.HasValue)
+            {
+                var Find = search.Trim().ToLower();
+                listProductDetail = listProductDetail.Where(
+                    x => x.Price >= from
+                    && x.Price <= to
+                    && x.Name.ToLower().Trim().Contains(Find)
+                    || x.ProducerName.ToLower().Trim().Contains(Find)
+                    || x.CategoryName.ToLower().Trim().Contains(Find)
+                    && x.Status == status);
+            }
+
+            return listProductDetail;
+        }
+
+        public async Task<ServiceResults<Laptop_Detail>> CreateLaptopDetail(CreateLaptopViewModel create)
+        {
+            var result = new ServiceResults<Laptop_Detail>();
+
+            var data = await _LapTopDetailRepositoty.GetAllAsync();
+            var id = "DTL" + Helper.GenerateRandomString(5);
+            var seri = Helper.GenerateRandomString(8);
+
+            do
+            {
+                id = "DTL" + Helper.GenerateRandomString(5);
+                seri = Helper.GenerateRandomString(8);
+            } while (data.Any(c => c.ID == id || c.Seri == seri));
+
+            Laptop_Detail cv = new Laptop_Detail()
+            {
+                ID = id,
+                Seri = seri,
+                COGS = create.COGS,
+                Price = create.Price,
+                Quatity = create.Quatity,
+                IdSSD = create.IdSSD,
+                IdRam = create.IdRam,
+                IdBattery = create.IdBattery,
+                IdCam = create.IdCam,
+                IdLap = create.IdLap,
+                IdMain = create.IdMain,
+                IdScren = create.IdScreen,
+                IdVga = create.IdVga,
+                Weight = create.Weight,
+                leght = create.leght,
+                Hight = create.Hight,
+                Status = 1,
+            };
+
+            try
+            {
+                var addedLaptopDetail = await _LapTopDetailRepositoty.AddOneAsync(cv);
+                result.IsSuccess = true;
+                result.Data = addedLaptopDetail;
+            }
+            catch (Exception)
+            {
+                result.IsSuccess = false;
+                result.ErrorMessage = "Create Fail";
+            }
+
+            return result;
+        }
+        public async Task<ServiceResults<Laptop_Detail>> UpdateLaptopDetail(string ID,UpdateLaptopDetailViewModel update)
+        {
+            var result = new ServiceResults<Laptop_Detail>();
+
+            try
+            {
+                var laptopDetail = await _LapTopDetailRepositoty.GetByIdAsync(ID);
+
+                if (laptopDetail == null)
+                {
+                    result.IsSuccess = false;
+                    result.ErrorMessage = "Laptop Detail not found";
+                    return result;
+                }
+
+                laptopDetail.COGS = update.COGS;
+                laptopDetail.Price = update.Price;
+                laptopDetail.Quatity = update.Quatity;
+                laptopDetail.IdSSD = update.IdSSD;
+                laptopDetail.IdRam = update.IdRam;
+                laptopDetail.IdBattery = update.IdBattery;
+                laptopDetail.IdCam = update.IdCam;
+                laptopDetail.IdLap = update.IdLap;
+                laptopDetail.IdMain = update.IdMain;
+                laptopDetail.IdScren = update.IdScreen;
+                laptopDetail.IdVga = update.IdVga;
+                laptopDetail.Weight = update.Weight;
+                laptopDetail.leght = update.leght;
+                laptopDetail.Hight = update.Hight;
+                laptopDetail.Status = update.Status;
+
+                await _LapTopDetailRepositoty.UpdateOneAsync(laptopDetail);
+
+                result.IsSuccess = true;
+                result.Data = laptopDetail;
+            }
+            catch (Exception)
+            {
+                result.IsSuccess = false;
+                result.ErrorMessage = "Update Fail";
+            }
+
+            return result;
         }
     }
 }

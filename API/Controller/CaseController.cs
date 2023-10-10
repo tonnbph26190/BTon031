@@ -6,6 +6,7 @@ using Data.IRepositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PagedList;
+using API.ViewModel.CaseViewModel;
 
 namespace API.Controller
 {
@@ -48,12 +49,12 @@ namespace API.Controller
         public async Task<IActionResult> GetById(string id)
         {
             var result = await _CaseRepository.GetByIdAsync(id);
-            if (result == null || result.Status == 0) return Ok("Case Do Not Exit");
+            if (result == null || result.Status == 0) return BadRequest("Case Do Not Exit");
             return Ok(result);
         }
         [HttpPost]
         [Route("create-case")]
-        public async Task<IActionResult> Create(CreateViewModel createModel)
+        public async Task<IActionResult> Create(CreateCaseViewModel createModel)
         {
             if (!ModelState.IsValid)
             {
@@ -70,12 +71,15 @@ namespace API.Controller
             {
                 ID = id,
                 Name = createModel.Name,
-                Value = createModel.Values,
+                Value = createModel.Value,
+                Quatity= createModel.Quatity,
+                COGS= createModel.COGS,
+                Price= createModel.Price,
                 Status = 1
             };
             try
             {
-                var result = await _CaseRepository.AddOneAsyn(NewObj);
+                var result = await _CaseRepository.AddOneAsync(NewObj);
                 return Ok(NewObj);
             }
             catch (Exception)
@@ -83,9 +87,9 @@ namespace API.Controller
                 return StatusCode(StatusCodes.Status500InternalServerError, "Create Fail");
             }
         }
-        [HttpPost]
+        [HttpPut]
         [Route("update-case/id")]
-        public async Task<IActionResult> Update(string id, UpdateViewModel updateModel)
+        public async Task<IActionResult> Update(string id, UpdateCaseViewModel updateModel)
         {
             var result = await _CaseRepository.GetByIdAsync(id);
             if (result == null)
@@ -100,10 +104,13 @@ namespace API.Controller
                 }
                 result.Name = updateModel.Name;
                 result.Status = updateModel.Status;
-                result.Value = updateModel.Values;
+                result.Value = updateModel.Value;
+                result.COGS = updateModel.COGS;
+                result.Price = updateModel.Price;
+                result.Quatity= updateModel.Quatity;
                 try
                 {
-                    await _CaseRepository.UpdateOneAsyn(result);
+                    await _CaseRepository.UpdateOneAsync(result);
                     return Ok(result);
                 }
                 catch (Exception)
@@ -126,7 +133,7 @@ namespace API.Controller
                 try
                 {
                     result.Status = 0;
-                    await _CaseRepository.UpdateOneAsyn(result);
+                    await _CaseRepository.UpdateOneAsync(result);
                     return Ok("Delete Successfully");
                 }
                 catch (Exception)

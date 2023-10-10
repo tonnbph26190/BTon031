@@ -13,10 +13,10 @@ namespace API.Controller
     [ApiController]
     public class ResolutionController : ControllerBase
     {
-        private IAllRepositories<Resolution> _repo;
+        private IAllRepositories<Resolution> _ResolutionReposistory;
         public ResolutionController(IAllRepositories<Resolution> repo)
         {
-            _repo = repo;
+            _ResolutionReposistory = repo;
         }
         [HttpGet]
         [Route("get-all-resolution")]
@@ -25,7 +25,7 @@ namespace API.Controller
             var pageNumber = page; // Trang hiện tại (mặc định là 1)
             var pageSize = Size; // Số mục trên mỗi trang
 
-            var results = await _repo.GetAllAsync();
+            var results = await _ResolutionReposistory.GetAllAsync();
 
             var filteredResults = results.Where(result => result.Status == 1);
 
@@ -47,8 +47,8 @@ namespace API.Controller
         [Route("get-resolution-by-id/{id}")]
         public async Task<IActionResult> GetById(string id)
         {
-            var result = await _repo.GetByIdAsync(id);
-            if (result == null || result.Status == 0) return Ok("Power Do Not Exit");
+            var result = await _ResolutionReposistory.GetByIdAsync(id);
+            if (result == null || result.Status == 0) return Ok("Resolution Do Not Exit");
             return Ok(result);
         }
 
@@ -65,7 +65,7 @@ namespace API.Controller
             do
             {
                 id = "Res" + Helper.GenerateRandomString(5);
-                ex = await _repo.GetByIdAsync(id);
+                ex = await _ResolutionReposistory.GetByIdAsync(id);
             } while (ex != null);
             Resolution NewObj = new Resolution()
             {
@@ -76,7 +76,7 @@ namespace API.Controller
             };
             try
             {
-                var result = await _repo.AddOneAsyn(NewObj);
+                var result = await _ResolutionReposistory.AddOneAsync(NewObj);
                 return Ok(NewObj);
             }
             catch (Exception)
@@ -85,11 +85,11 @@ namespace API.Controller
             }
 
         }
-        [HttpPost]
+        [HttpPut]
         [Route("update-power/id")]
         public async Task<IActionResult> Update(string id, UpdateViewModel update)
         {
-            var result = await _repo.GetByIdAsync(id);
+            var result = await _ResolutionReposistory.GetByIdAsync(id);
             if (result == null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Resolution do not Exist");
@@ -105,7 +105,7 @@ namespace API.Controller
                 result.Value = update.Values;
                 try
                 {
-                    await _repo.UpdateOneAsyn(result);
+                    await _ResolutionReposistory.UpdateOneAsync(result);
                     return Ok(result);
                 }
                 catch (Exception)
@@ -121,7 +121,7 @@ namespace API.Controller
         [Route("delete-power/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var result = await _repo.GetByIdAsync(id);
+            var result = await _ResolutionReposistory.GetByIdAsync(id);
             if (result == null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Resolution do not Exist");
@@ -131,7 +131,7 @@ namespace API.Controller
                 try
                 {
                     result.Status = 0;
-                    await _repo.UpdateOneAsyn(result);
+                    await _ResolutionReposistory.UpdateOneAsync(result);
                     return Ok("Delete Successfully");
                 }
                 catch (Exception)

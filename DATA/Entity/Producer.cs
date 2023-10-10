@@ -10,6 +10,7 @@ namespace DATA.Entity
     public class Producer
     {
         [Required]
+        [Key]
         [StringLength(30)]
         public string ID { get; set; }
         [Required]
