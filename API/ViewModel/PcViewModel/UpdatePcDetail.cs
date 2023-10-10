@@ -5,13 +5,10 @@ namespace API.ViewModel.PcViewModel
 {
     public class UpdatePcDetail:IPcDetailViewModel
     {
-        public decimal COGS { get; set; }
-        [RegularExpression(@"^-?\d+(\.\d+)?$")]
-        public decimal Price { get; set; }
         [RegularExpression(@"^-?\d+$")]
         [Range(0, 5, ErrorMessage = "Trạng thái phải từ 0 đến 5")]
         public int Status { get; set; }
-        [RegularExpression(@"^-?\d+$")]
+        [RegularExpression(@"^(?!0)\d+$")]
         public int Quatity { get; set; }
         [Required]
         [StringLength(30)]

@@ -19,10 +19,10 @@ namespace API.Controller
         }
         [HttpGet]
         [Route("get-all-webcam")]
-        public async Task<IActionResult> GetAllCam(int? page, int? Size)
+        public async Task<IActionResult> GetAllCam(int page=1, int Size = 10)
         {
-            var pageNumber = page ?? 1; // Trang hiện tại (mặc định là 1)
-            var pageSize = Size ?? 10; // Số mục trên mỗi trang
+            var pageNumber = page; // Trang hiện tại (mặc định là 1)
+            var pageSize = Size; // Số mục trên mỗi trang
 
             var results = await _repo.GetAllAsync();
 
@@ -53,7 +53,7 @@ namespace API.Controller
 
         [HttpPost]
         [Route("create-cam")]
-        public async Task<IActionResult> CreateCam([FromForm] CreateRam ccv)
+        public async Task<IActionResult> CreateCam([FromForm] CreateRam create)
         {
             if (!ModelState.IsValid)
             {
@@ -65,17 +65,17 @@ namespace API.Controller
             {
                 id = "CA" + Helper.GenerateRandomString(5);
             } while (data.Any(c => c.ID == id));
-            Webcam cv = new Webcam()
+            Webcam NewObj = new Webcam()
             {
                 ID = id,
-                Name = ccv.Name,
-                Parameter = ccv.Parameter,
+                Name = create.Name,
+                Parameter = create.Parameter,
                 Status = 1
             };
             try
             {
-                var result = await _repo.AddOneAsyn(cv);
-                return Ok(cv);
+                var result = await _repo.AddOneAsync(NewObj);
+                return Ok(NewObj);
             }
             catch (Exception)
             {
@@ -83,7 +83,7 @@ namespace API.Controller
             }
 
         }
-        [HttpPost]
+        [HttpPut]
         [Route("update-cam/id")]
         public async Task<IActionResult> UpdateCam(string id, [FromForm] UpdateRam ucv)
         {
@@ -103,7 +103,7 @@ namespace API.Controller
                 result.Parameter = ucv.Parameter;
                 try
                 {
-                    await _repo.UpdateOneAsyn(result);
+                    await _repo.UpdateOneAsync(result);
                     return Ok(result);
                 }
                 catch (Exception)
@@ -129,7 +129,7 @@ namespace API.Controller
                 try
                 {
                     result.Status = 0;
-                    await _repo.UpdateOneAsyn(result);
+                    await _repo.UpdateOneAsync(result);
                     return Ok("Delete Successfully");
                 }
                 catch (Exception)

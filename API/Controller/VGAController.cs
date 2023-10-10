@@ -19,10 +19,10 @@ namespace API.Controller
         }
         [HttpGet]
         [Route("get-all-vga")]
-        public async Task<IActionResult> GetAllVGA(int? page, int? Size)
+        public async Task<IActionResult> GetAllVGA(int page=1, int Size = 10)
         {
-            var pageNumber = page ?? 1; // Trang hiện tại (mặc định là 1)
-            var pageSize = Size ?? 10; // Số mục trên mỗi trang
+            var pageNumber = page; // Trang hiện tại (mặc định là 1)
+            var pageSize = Size; // Số mục trên mỗi trang
 
             var results = await _repo.GetAllAsync();
 
@@ -53,7 +53,7 @@ namespace API.Controller
 
         [HttpPost]
         [Route("create-vga")]
-        public async Task<IActionResult> CreateVGA([FromForm] CreateRam ccv)
+        public async Task<IActionResult> CreateVGA([FromForm] CreateRam create)
         {
             if (!ModelState.IsValid)
             {
@@ -65,17 +65,25 @@ namespace API.Controller
             {
                 id = "VG" + Helper.GenerateRandomString(5);
             } while (data.Any(c => c.ID == id));
-            VGA cv = new VGA()
+            VGA NewObj = new VGA()
             {
                 ID = id,
-                Name = ccv.Name,
-                Parameter = ccv.Parameter,
-                Status = 1
+                Name = create.Name,
+                Parameter = create.Parameter,
+                Status = 1,
+                Type= create.Type,
+                
             };
+            if (create.Type==2)
+            {
+                NewObj.COGS = create.COGS;
+                NewObj.Price= create.Price;
+                NewObj.Quatity= create.Quatity;
+            }
             try
             {
-                var result = await _repo.AddOneAsyn(cv);
-                return Ok(cv);
+                var result = await _repo.AddOneAsync(NewObj);
+                return Ok(NewObj);
             }
             catch (Exception)
             {
@@ -83,9 +91,9 @@ namespace API.Controller
             }
 
         }
-        [HttpPost]
+        [HttpPut]
         [Route("update_vga/id")]
-        public async Task<IActionResult> UpdateRam(string id, [FromForm] UpdateRam ucv)
+        public async Task<IActionResult> UpdateRam(string id, [FromForm] UpdateRam update)
         {
             var result = await _repo.GetByIdAsync(id);
             if (result == null)
@@ -98,12 +106,19 @@ namespace API.Controller
                 {
                     StatusCode(StatusCodes.Status400BadRequest, "Error Request");
                 }
-                result.Name = ucv.Name;
-                result.Status = ucv.Status;
-                result.Parameter = ucv.Parameter;
+                result.Name = update.Name;
+                result.Status = update.Status;
+                result.Parameter = update.Parameter;
+                result.Type = update.Type;
+                if (update.Type == 2)
+                {
+                    result.COGS = update.COGS;
+                    result.Price = update.Price;
+                    result.Quatity = update.Quatity;
+                }
                 try
                 {
-                    await _repo.UpdateOneAsyn(result);
+                    await _repo.UpdateOneAsync(result);
                     return Ok(result);
                 }
                 catch (Exception)
@@ -129,7 +144,7 @@ namespace API.Controller
                 try
                 {
                     result.Status = 0;
-                    await _repo.UpdateOneAsyn(result);
+                    await _repo.UpdateOneAsync(result);
                     return Ok("Delete Successfully");
                 }
                 catch (Exception)

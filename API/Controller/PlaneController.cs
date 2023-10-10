@@ -14,10 +14,10 @@ namespace API.Controller
     [ApiController]
     public class PlaneController : ControllerBase
     {
-        private IAllRepositories<Panel> _repo;
+        private IAllRepositories<Panel> _PanelRepository;
         public PlaneController(IAllRepositories<Panel> repo)
         {
-            _repo = repo;
+            _PanelRepository = repo;
         }
         [HttpGet]
         [Route("get-all-panel")]
@@ -26,7 +26,7 @@ namespace API.Controller
             var pageNumber = page; // Trang hiện tại (mặc định là 1)
             var pageSize = Size; // Số mục trên mỗi trang
 
-            var results = await _repo.GetAllAsync();
+            var results = await _PanelRepository.GetAllAsync();
 
             var filteredResults = results.Where(result => result.Status == 1);
 
@@ -48,7 +48,7 @@ namespace API.Controller
         [Route("get-panel-by-id/{id}")]
         public async Task<IActionResult> GetById(string id)
         {
-            var result = await _repo.GetByIdAsync(id);
+            var result = await _PanelRepository.GetByIdAsync(id);
             if (result == null || result.Status == 0) return Ok("Panel Do Not Exit");
             return Ok(result);
         }
@@ -62,12 +62,12 @@ namespace API.Controller
                 StatusCode(StatusCodes.Status400BadRequest, "Error Request");
             }
             var id = "PL" + Helper.GenerateRandomString(5);
-            Panel ex = new Panel();
+            Panel ExistObj = new Panel();
             do
             {
                 id = "PL" + Helper.GenerateRandomString(5);
-                ex = await _repo.GetByIdAsync(id);
-            } while (ex != null);
+                ExistObj = await _PanelRepository.GetByIdAsync(id);
+            } while (ExistObj != null);
             Panel NewObj = new Panel()
             {
                 ID = id,
@@ -77,7 +77,7 @@ namespace API.Controller
             };
             try
             {
-                var result = await _repo.AddOneAsyn(NewObj);
+                var result = await _PanelRepository.AddOneAsync(NewObj);
                 return Ok(NewObj);
             }
             catch (Exception)
@@ -86,11 +86,11 @@ namespace API.Controller
             }
 
         }
-        [HttpPost]
+        [HttpPut]
         [Route("update-panel/id")]
         public async Task<IActionResult> Update(string id, UpdateViewModel update)
         {
-            var result = await _repo.GetByIdAsync(id);
+            var result = await _PanelRepository.GetByIdAsync(id);
             if (result == null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Panel do not Exist");
@@ -106,7 +106,7 @@ namespace API.Controller
                 result.Value = update.Values;
                 try
                 {
-                    await _repo.UpdateOneAsyn(result);
+                    await _PanelRepository.UpdateOneAsync(result);
                     return Ok(result);
                 }
                 catch (Exception)
@@ -120,7 +120,7 @@ namespace API.Controller
         [Route("delete-panel/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var result = await _repo.GetByIdAsync(id);
+            var result = await _PanelRepository.GetByIdAsync(id);
             if (result == null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Panel do not Exist");
@@ -130,7 +130,7 @@ namespace API.Controller
                 try
                 {
                     result.Status = 0;
-                    await _repo.UpdateOneAsyn(result);
+                    await _PanelRepository.UpdateOneAsync(result);
                     return Ok("Delete Successfully");
                 }
                 catch (Exception)

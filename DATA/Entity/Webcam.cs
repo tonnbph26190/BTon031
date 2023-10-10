@@ -9,6 +9,7 @@ namespace DATA.Entity
 {
     public class Webcam
     {
+        [Key]
         [Required]
         [StringLength(30)]
         public string ID { get; set; }

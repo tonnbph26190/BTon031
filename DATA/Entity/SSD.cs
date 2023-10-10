@@ -9,6 +9,7 @@ namespace DATA.Entity
 {
     public class SSD
     {
+        [Key]
         [Required]
         [StringLength(30)]
         public string ID { get; set; }
@@ -19,6 +20,10 @@ namespace DATA.Entity
         public int Status { get; set; }
         [MaxLength(50)]
         public string? Parameter { get; set; }
+        public decimal? Price { get; set; }
+        public decimal? COGS { get; set; }
+        public int Type { get; set; }
+        public int? Quatity { get; set; }
         public ICollection<Laptop_Detail> Laptop_Detail { get; set; }
         public ICollection<PcDetail> PcDetails { get; set; }
     }

@@ -2,11 +2,12 @@
 
 namespace API.ViewModel.MonitorViewModel
 {
-    public class CreateMonitorViewModel
+    public class CreateMonitorViewModel : IMonitorDetail
     {
-        public string Seri { get; set; }
+        [Range(100000, int.MaxValue)]
         [RegularExpression(@"^-?\d+(\.\d+)?$")]
         public decimal COGS { get; set; }
+        [Range(100000,int.MaxValue)]
         [RegularExpression(@"^-?\d+(\.\d+)?$")]
         public decimal Price { get; set; }
         [RegularExpression(@"^-?\d+$")]

@@ -19,10 +19,10 @@ namespace API.Controller
         }
         [HttpGet]
         [Route("get-all-ssd")]
-        public async Task<IActionResult> GetAllSSD(int? page, int? Size)
+        public async Task<IActionResult> GetAllSSD(int page = 1, int Size = 10)
         {
-            var pageNumber = page ?? 1; // Trang hiện tại (mặc định là 1)
-            var pageSize = Size ?? 10; // Số mục trên mỗi trang
+            var pageNumber = page; // Trang hiện tại (mặc định là 1)
+            var pageSize = Size; // Số mục trên mỗi trang
 
             var results = await _repo.GetAllAsync();
 
@@ -53,39 +53,50 @@ namespace API.Controller
 
         [HttpPost]
         [Route("create-ssd")]
-        public async Task<IActionResult> CreateSSD([FromForm] CreateRam ccv)
+        public async Task<IActionResult> CreateSSD([FromForm] CreateRam create)
         {
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, "Create Fail");
             }
+
             var data = await _repo.GetAllAsync();
             var id = "S" + Helper.GenerateRandomString(5);
-            do
+            bool isIdUnique = data.Any(c => c.ID == id);
+
+            while (isIdUnique)
             {
                 id = "S" + Helper.GenerateRandomString(5);
-            } while (data.Any(c => c.ID == id));
-            SSD cv = new SSD()
+                isIdUnique = data.Any(c => c.ID == id);
+            }
+            var NewObj = new SSD()
             {
                 ID = id,
-                Name = ccv.Name,
-                Parameter = ccv.Parameter,
-                Status = 1
+                Name = create.Name,
+                Parameter = create.Parameter,
+                Status = 1,
+                Type = create.Type,
             };
+            if (create.Type == 2)
+            {
+                NewObj.Price = create.Price;
+                NewObj.COGS = create.COGS;
+                NewObj.Quatity = create.Quatity;
+            }
+
             try
             {
-                var result = await _repo.AddOneAsyn(cv);
-                return Ok(cv);
+                var result = await _repo.AddOneAsync(NewObj);
+                return Ok(NewObj);
             }
             catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Create Fail");
             }
-
         }
-        [HttpPost]
+        [HttpPut]
         [Route("update-ssd/id")]
-        public async Task<IActionResult> UpdateSSD(string id, [FromForm] UpdateRam ucv)
+        public async Task<IActionResult> UpdateSSD(string id, [FromForm] UpdateRam Update)
         {
             var result = await _repo.GetByIdAsync(id);
             if (result == null)
@@ -98,12 +109,20 @@ namespace API.Controller
                 {
                     StatusCode(StatusCodes.Status400BadRequest, "Error Request");
                 }
-                result.Name = ucv.Name;
-                result.Status = ucv.Status;
-                result.Parameter = ucv.Parameter;
+
+                result.Name = Update.Name;
+                result.Status = Update.Status;
+                result.Parameter = Update.Parameter;
+                result.Type = Update.Type;
+                if (Update.Type == 2)
+                {
+                    result.COGS = Update.COGS;
+                    result.Quatity = Update.Quatity;
+                    result.Price = Update.Price;
+                }
                 try
                 {
-                    await _repo.UpdateOneAsyn(result);
+                    await _repo.UpdateOneAsync(result);
                     return Ok(result);
                 }
                 catch (Exception)
@@ -129,7 +148,7 @@ namespace API.Controller
                 try
                 {
                     result.Status = 0;
-                    await _repo.UpdateOneAsyn(result);
+                    await _repo.UpdateOneAsync(result);
                     return Ok("Delete Successfully");
                 }
                 catch (Exception)

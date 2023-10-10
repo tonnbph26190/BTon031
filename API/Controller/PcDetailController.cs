@@ -11,6 +11,7 @@ using API.Extensions;
 using API.IService;
 using API.Service;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using AutoMapper;
 
 namespace API.Controller
 {
@@ -19,32 +20,10 @@ namespace API.Controller
     public class PcDetailController : ControllerBase
     {
         private IAllRepositories<PcDetail> _PcDetailRepository;
-        private IAllRepositories<SSD> _SSDRepository;
-        private IAllRepositories<VGA> _VGARepository;
-        private IAllRepositories<Ram> _RamRepository;
-        private IAllRepositories<Main> _MainRepository;
-        private IAllRepositories<PC> _PcRepository;
-        private IAllRepositories<Power> _PowerRepository;
-        private IAllRepositories<Case> _CaseRepository;
-        private IAllRepositories<Custom> _CustomRepository;
-        private IAllRepositories<Producer> _ProducerRepository;
-        private IAllRepositories<Category> _CategoryRepository;
-        private IAllRepositories<Cooling> _CoolingRepository;
         private IPcDetailService _Service;
-        public PcDetailController(IAllRepositories<PcDetail> PcDetailRepository, IAllRepositories<SSD> SSDRepository, IAllRepositories<VGA> VGARepository, IAllRepositories<Ram> RamRepository, IAllRepositories<Main> MainRepository, IAllRepositories<PC> PcRepository, IAllRepositories<Power> PowerRepository, IAllRepositories<Case> CaseRepository, IAllRepositories<Custom> CustomRepository, IAllRepositories<Producer> ProducerRepository, IAllRepositories<Category> CategoryRepository, IAllRepositories<Cooling> CoolingRepository, IPcDetailService Service)
+        public PcDetailController(IAllRepositories<PcDetail> PcDetailRepository, IPcDetailService Service)
         {
             _PcDetailRepository = PcDetailRepository;
-            _MainRepository = MainRepository;
-            _CaseRepository = CaseRepository;
-            _CategoryRepository = CategoryRepository;
-            _ProducerRepository = ProducerRepository;
-            _PcRepository = PcRepository;
-            _PowerRepository = PowerRepository;
-            _RamRepository = RamRepository;
-            _VGARepository = VGARepository;
-            _SSDRepository = SSDRepository;
-            _CustomRepository = CustomRepository;
-            _CoolingRepository = CoolingRepository;
             _Service = Service;
         }
         [HttpGet]
@@ -81,48 +60,13 @@ namespace API.Controller
         [Route("find-pc-detail")]
         public async Task<IActionResult> Find(decimal? from, decimal? to, string? search, int? status)
         {
-            var listProductDetail = await _Service.GetAll();
-            if (!string.IsNullOrEmpty(search))
-            {
-                var Find = search.Trim().ToLower();
-                listProductDetail = listProductDetail.Where(x => x.Name.ToLower().Contains(Find)
-                || x.ProducerName.ToLower().Trim().Contains(Find)
-                || x.CategoryName.Contains(Find));
-            }
-            if (from.HasValue)
-            {
-                listProductDetail = listProductDetail.Where(x => x.Price >= from);
-            }
-            if (to.HasValue)
-            {
-                listProductDetail = listProductDetail.Where(x => x.Price <= to);
-            }
-            if (status.HasValue)
-            {
-                listProductDetail = listProductDetail.Where(x => x.Status == status);
-            }
-            if (from.HasValue && to.HasValue && !string.IsNullOrEmpty(search))
-            {
-                var Find = search.Trim().ToLower();
-                listProductDetail = listProductDetail.Where(x => x.Price >= from && x.Price <= to && x.Name.ToLower().Trim().Contains(Find)
-                || x.ProducerName.ToLower().Trim().Contains(Find)
-                || x.CategoryName.ToLower().Trim().Contains(Find));
-            }
-            if (from.HasValue && to.HasValue && !string.IsNullOrEmpty(search) && status.HasValue)
-            {
-                var Find = search.Trim().ToLower();
-                listProductDetail = listProductDetail.Where(x => x.Price >= from && x.Price <= to && x.Name.ToLower().Trim().Contains(Find)
-                || x.ProducerName.ToLower().Trim().Contains(Find)
-                || x.CategoryName.ToLower().Trim().Contains(Find) && x.Status == status);
-            }
-
-            return Ok(listProductDetail);
+           return Ok( await _Service.GetFilteredProductDetails(search,from,to,status));    
         }
         [HttpPost]
         [Route("create-pc-detail")]
         public async Task<IActionResult> Create(CreatePcDetail create)
         {
-            if (!ModelState.IsValid || create.COGS > create.Price)
+            if (!ModelState.IsValid || create.Quatity <= 0)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, "Error Request");
             }
@@ -132,66 +76,24 @@ namespace API.Controller
                 return StatusCode(StatusCodes.Status400BadRequest, "Error Request");
             }
             //
-            var PcDetailExist = await _Service.CheckPcDetailExistence(create);
+            var serviceResult = await _Service.CreatePcDetail(create);
 
-            if (PcDetailExist != null)
+            if (serviceResult.IsSuccess)
             {
-                PcDetailExist.Quatity = PcDetailExist.Quatity + create.Quatity;
-                PcDetailExist.Price = create.Price;
-                PcDetailExist.COGS = create.COGS;
-                await _PcDetailRepository.UpdateOneAsyn(PcDetailExist);
-                return StatusCode(StatusCodes.Status200OK, "Update Quatity succes");
+                return Ok(serviceResult.Data);
             }
-            //
-            var data = await _PcDetailRepository.GetAllAsync();
-            var id = "DTPC" + Helper.GenerateRandomString(5);
-            var seri = Helper.GenerateRandomString(8);
-            do
+            else
             {
-                id = "DTPC" + Helper.GenerateRandomString(5);
-                seri = Helper.GenerateRandomString(8);
-            } while (data.Any(c => c.ID == id || c.Seri == seri));
-            PcDetail pc = new PcDetail()
-            {
-                ID = id,
-                Seri = seri,
-                COGS = create.COGS,
-                Price = create.Price,
-                Quatity = create.Quatity,
-                RamID = create.RamID,
-                SSDId = create.SSDId,
-                PowerID = create.PowerID,
-                PcID = create.PcID,
-                MainID = create.MainID,
-                VgaID = create.VgaID,
-                CoolingID = create.CoolingID,
-                CaseID = create.CaseID,
-                CustomID = create.CustomID == null ? null : create.CustomID,
-                Status = 1,
-            };
-            try
-            {
-                var result = await _PcDetailRepository.AddOneAsyn(pc);
-                return Ok(pc);
+                return StatusCode(StatusCodes.Status500InternalServerError, serviceResult.ErrorMessage);
             }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Create Fail");
-            }
-
         }
         [HttpPut]
         [Route("update-pc-detail/id")]
         public async Task<IActionResult> Update(string id, UpdatePcDetail update)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid|update.Quatity<=0)
             {
                 StatusCode(StatusCodes.Status400BadRequest, "Error Request");
-            }
-            var result = await _PcDetailRepository.GetByIdAsync(id);
-            if (result == null)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Pc Detail do not Exist");
             }
             //
             if (await _Service.IsUpdateRequestValid(update))
@@ -199,41 +101,19 @@ namespace API.Controller
                 return StatusCode(StatusCodes.Status400BadRequest, "Error Request");
             }
             //
-            var PcDetailExist = await _Service.CheckPcDetailExistence(update);
+            var serviceResult = await _Service.UpdatePcDetail(id,update);
 
-            if (PcDetailExist != null)
+            if (serviceResult.IsSuccess)
             {
-                PcDetailExist.Quatity = PcDetailExist.Quatity + update.Quatity;
-                PcDetailExist.Price = update.Price;
-                PcDetailExist.COGS = update.COGS;
-                await _PcDetailRepository.UpdateOneAsyn(PcDetailExist);
-                return StatusCode(StatusCodes.Status200OK, "Update Quatity succes");
+                return Ok(serviceResult.Data);
             }
-            result.COGS = update.COGS;
-            result.Price = update.Price;
-            result.Quatity = update.Quatity;
-            result.RamID = update.RamID;
-            result.SSDId = update.SSDId;
-            result.PowerID = update.PowerID;
-            result.PcID = update.PcID;
-            result.MainID = update.MainID;
-            result.VgaID = update.VgaID;
-            result.CoolingID = update.CoolingID;
-            result.CaseID = update.CaseID;
-            result.CustomID = update.CustomID == null ? null : update.CustomID;
-            result.Status = update.Status;
-            try
+            else
             {
-                await _PcDetailRepository.UpdateOneAsyn(result);
-                return Ok(result);
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Update Fail");
+                return StatusCode(StatusCodes.Status500InternalServerError, serviceResult.ErrorMessage);
             }
         }
         [HttpDelete]
-        [Route("delete-laptopdetail/{id}")]
+        [Route("delete-laptop-detail/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
             var result = await _PcDetailRepository.GetByIdAsync(id);
@@ -246,7 +126,7 @@ namespace API.Controller
                 try
                 {
                     result.Status = 0;
-                    await _PcDetailRepository.UpdateOneAsyn(result);
+                    await _PcDetailRepository.UpdateOneAsync(result);
                     return Ok("Delete Successfully");
                 }
                 catch (Exception)

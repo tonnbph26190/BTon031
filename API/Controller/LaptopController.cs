@@ -13,24 +13,24 @@ namespace API.Controller
     [ApiController]
     public class LaptopController : ControllerBase
     {
-        private IAllRepositories<Laptop> _repo;
+        private IAllRepositories<Laptop> _LaptopRepository;
 
-        private IAllRepositories<Category> _repoCat;
-        private IAllRepositories<Producer> _repoPro;
+        private IAllRepositories<Category> _CategoryRepository;
+        private IAllRepositories<Producer> _ProducerRepository;
         public LaptopController(IAllRepositories<Laptop> repo, IAllRepositories<Category> repoCat, IAllRepositories<Producer> repoPro)
         {
-            _repo = repo;
-            _repoCat = repoCat;
-            _repoPro = repoPro;
+            _LaptopRepository = repo;
+            _CategoryRepository = repoCat;
+            _ProducerRepository = repoPro;
         }
         [HttpGet]
         [Route("get-all-lapTop")]
-        public async Task<IActionResult> GetAllLaptop(int? page, int? Size)
+        public async Task<IActionResult> GetAllLaptop(int page=1, int Size=10)
         {
-            var pageNumber = page ?? 1; // Trang hiện tại (mặc định là 1)
-            var pageSize = Size ?? 10; // Số mục trên mỗi trang
+            var pageNumber = page; // Trang hiện tại (mặc định là 1)
+            var pageSize = Size; // Số mục trên mỗi trang
 
-            var results = await _repo.GetAllAsync();
+            var results = await _LaptopRepository.GetAllAsync();
 
             var filteredResults = results.Where(result => result.Status == 1);
 
@@ -52,37 +52,37 @@ namespace API.Controller
         [Route("get-laptop-by-id/{id}")]
         public async Task<IActionResult> GetLaptopById(string id)
         {
-            var result = await _repo.GetByIdAsync(id);
+            var result = await _LaptopRepository.GetByIdAsync(id);
             if (result == null || result.Status == 0) return Ok("Laptop Do Not Exit");
             return Ok(result);
         }
 
         [HttpPost]
         [Route("create_laptop")]
-        public async Task<IActionResult> CreateBattery([FromForm] CreateLaptop ccv)
+        public async Task<IActionResult> CreateBattery([FromForm] CreateLaptop Create)
         {
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, "Error Request");
             }
-            var data = await _repo.GetAllAsync();
+            var data = await _LaptopRepository.GetAllAsync();
             var id = "Lt" + Helper.GenerateRandomString(5);
             do
             {
                 id = "Lt" + Helper.GenerateRandomString(5);
             } while (data.Any(c => c.ID == id));
-            Laptop cv = new Laptop()
+            Laptop NewObj = new Laptop()
             {
                 ID = id,
-                Name = ccv.Name,
-                IdCat = ccv.IdCat,
-                IdProducer = ccv.IdProducer,
+                Name = Create.Name,
+                IdCat = Create.IdCat,
+                IdProducer = Create.IdProducer,
                 Status = 1
             };
             try
             {
-                var result = await _repo.AddOneAsyn(cv);
-                return Ok(cv);
+                var result = await _LaptopRepository.AddOneAsync(NewObj);
+                return Ok(NewObj);
             }
             catch (Exception)
             {
@@ -90,24 +90,24 @@ namespace API.Controller
             }
 
         }
-        [HttpPost]
+        [HttpPut]
         [Route("update_laptop/id")]
         public async Task<IActionResult> UpdateBattery(string id, [FromForm] UpdateLaptop ucv)
         {
-            var result = await _repo.GetByIdAsync(id);
+            var result = await _LaptopRepository.GetByIdAsync(id);
             if (result == null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Laptop do not Exist");
             }
-            var Cat = _repoCat.GetByIdAsync(ucv.IdCat);
-            var Pro = _repoPro.GetByIdAsync(ucv.IdProducer);          
+            var Category = _CategoryRepository.GetByIdAsync(ucv.IdCat);
+            var Producer = _ProducerRepository.GetByIdAsync(ucv.IdProducer);          
             if (!ModelState.IsValid)
             {
                return StatusCode(StatusCodes.Status400BadRequest, "Error Request");
             }
             else
             {
-                if (Pro.Status == 0 || Cat.Status == 0)
+                if (Producer.Status == 0 || Category.Status == 0)
                 {
                     return StatusCode(StatusCodes.Status400BadRequest, "Error Request");
                 }
@@ -117,7 +117,7 @@ namespace API.Controller
                 result.IdCat = ucv.IdCat;
                 try
                 {
-                    await _repo.UpdateOneAsyn(result);
+                    await _LaptopRepository.UpdateOneAsync(result);
                     return Ok(result);
                 }
                 catch (Exception)
@@ -130,7 +130,7 @@ namespace API.Controller
         [Route("delete_laptop/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var result = await _repo.GetByIdAsync(id);
+            var result = await _LaptopRepository.GetByIdAsync(id);
             if (result == null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Laptop do not Exist");
@@ -140,7 +140,7 @@ namespace API.Controller
                 try
                 {
                     result.Status = 0;
-                    await _repo.UpdateOneAsyn(result);
+                    await _LaptopRepository.UpdateOneAsync(result);
                     return Ok("Delete Successfully");
                 }
                 catch (Exception)

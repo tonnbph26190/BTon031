@@ -10,6 +10,7 @@ namespace DATA.Entity
 {
     public class Screen
     {
+        [Key]
         [Required]
         [StringLength(30)]
         public string ID { get; set; }

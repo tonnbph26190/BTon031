@@ -13,19 +13,19 @@ namespace API.Controller
     [ApiController]
     public class ProducerController : ControllerBase
     {
-        private IAllRepositories<Producer> _repo;
+        private IAllRepositories<Producer> _ProducerRepository;
         public ProducerController(IAllRepositories<Producer> repo)
         {
-            _repo = repo;
+            _ProducerRepository = repo;
         }
         [HttpGet]
         [Route("get-all-producer")]
-        public async Task<IActionResult> GetAllProducer(int? page, int? Size)
+        public async Task<IActionResult> GetAllProducer(int page=1, int Size= 10)
         {
-            var pageNumber = page ?? 1; // Trang hiện tại (mặc định là 1)
-            var pageSize = Size ?? 10; // Số mục trên mỗi trang
+            var pageNumber = page; // Trang hiện tại (mặc định là 1)
+            var pageSize = Size; // Số mục trên mỗi trang
 
-            var results = await _repo.GetAllAsync();
+            var results = await _ProducerRepository.GetAllAsync();
 
             var filteredResults = results.Where(result => result.Status == 1);
 
@@ -47,46 +47,46 @@ namespace API.Controller
         [Route("get-producer-by-id/{id}")]
         public async Task<IActionResult> GetProducerById(string id)
         {
-            var result = await _repo.GetByIdAsync(id);
+            var result = await _ProducerRepository.GetByIdAsync(id);
             if (result == null || result.Status == 0) return Ok("Producer Do Not Exit");
             return Ok(result);
         }
 
         [HttpPost]
         [Route("create-producer")]
-        public async Task<IActionResult> CreateProducer([FromForm] CreateProducer ccv)
+        public async Task<IActionResult> CreateProducer([FromForm] CreateProducer create)
         {
             if (!ModelState.IsValid)
             {
                 return StatusCode(StatusCodes.Status400BadRequest, "Create Fail");
             }
-            var data = await _repo.GetAllAsync();
+            var data = await _ProducerRepository.GetAllAsync();
             var id = "P" + Helper.GenerateRandomString(5);
             do
             {
                 id = "P" + Helper.GenerateRandomString(5);
             } while (data.Any(c => c.ID == id));
-            Producer cv = new Producer()
+            Producer NewObj = new Producer()
             {
                 ID = id,
                 Status = 1,
-                Name= ccv.Name,
+                Name= create.Name,
             };
             try
             {
-                var result = await _repo.AddOneAsyn(cv);
-                return Ok(cv);
+                var result = await _ProducerRepository.AddOneAsync(NewObj);
+                return Ok(NewObj);
             }
             catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Create Fail");
             }
         }
-        [HttpPost]
+        [HttpPut]
         [Route("update-producer/id")]
-        public async Task<IActionResult> UpdateProducer(string id, [FromForm] UpdateCategoryViewModel ucv)
+        public async Task<IActionResult> UpdateProducer(string id, [FromForm] UpdateCategoryViewModel Update)
         {
-            var result = await _repo.GetByIdAsync(id);
+            var result = await _ProducerRepository.GetByIdAsync(id);
             if (result == null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Category do not Exist");
@@ -97,11 +97,11 @@ namespace API.Controller
                 {
                     StatusCode(StatusCodes.Status400BadRequest, "Error Request");
                 }
-                result.Name = ucv.Name;
-                result.Status = ucv.Status;
+                result.Name = Update.Name;
+                result.Status = Update.Status;
                 try
                 {
-                    await _repo.UpdateOneAsyn(result);
+                    await _ProducerRepository.UpdateOneAsync(result);
                     return Ok(result);
                 }
                 catch (Exception)
@@ -115,7 +115,7 @@ namespace API.Controller
         [Route("delete-producer/{id}")]
         public async Task<IActionResult> Delete(string id)
         {
-            var result = await _repo.GetByIdAsync(id);
+            var result = await _ProducerRepository.GetByIdAsync(id);
             if (result == null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Producer do not Exist");
@@ -125,7 +125,7 @@ namespace API.Controller
                 try
                 {
                     result.Status = 0;
-                    await _repo.UpdateOneAsyn(result);
+                    await _ProducerRepository.UpdateOneAsync(result);
                     return Ok("Delete Successfully");
                 }
                 catch (Exception)

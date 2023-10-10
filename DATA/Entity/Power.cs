@@ -11,6 +11,7 @@ namespace DATA.Entity
     {
         [Required]
         [StringLength(30)]
+        [Key]
         public string ID { get; set; }
         [Required]
         [StringLength(50)]
@@ -18,7 +19,10 @@ namespace DATA.Entity
         [RegularExpression(@"^-?\d+$")]
         public int Status { get; set; }
         [MaxLength(50)]
-        public string? Value { get; set; }
+        public string Value { get; set; }
+        public decimal? Price { get; set; }
+        public decimal? COGS { get; set; }
+        public int? Quatity { get; set; }
         public ICollection<PcDetail> PC_Detail { get; set; }
     }
 }

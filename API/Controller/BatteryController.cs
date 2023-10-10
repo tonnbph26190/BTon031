@@ -20,10 +20,10 @@ namespace API.Controller
         }
         [HttpGet]
         [Route("get-all-battery")]
-        public async Task<IActionResult> GetAllBattery(int? page, int? Size)
+        public async Task<IActionResult> GetAllBattery(int page=1, int Size=10)
         {
-            var pageNumber = page ?? 1; // Trang hiện tại (mặc định là 1)
-            var pageSize = Size ?? 10; // Số mục trên mỗi trang
+            var pageNumber = page; // Trang hiện tại (mặc định là 1)
+            var pageSize = Size; // Số mục trên mỗi trang
 
             var results = await _BatteryRepository.GetAllAsync();
 
@@ -75,7 +75,7 @@ namespace API.Controller
             };
             try
             {
-                var result = await _BatteryRepository.AddOneAsyn(cv);
+                var result = await _BatteryRepository.AddOneAsync(cv);
                 return Ok(cv);
             }
             catch (Exception)
@@ -84,7 +84,7 @@ namespace API.Controller
             }
 
         }
-        [HttpPost]
+        [HttpPut]
         [Route("update-battery/id")]
         public async Task<IActionResult> UpdateBattery(string id, [FromForm] UpdateBattery updateModel)
         {
@@ -104,7 +104,7 @@ namespace API.Controller
                 result.Parameter=updateModel.Parameter;
                 try
                 {
-                    await _BatteryRepository.UpdateOneAsyn(result);
+                    await _BatteryRepository.UpdateOneAsync(result);
                     return Ok(result);
                 }
                 catch (Exception)
@@ -130,7 +130,7 @@ namespace API.Controller
                 try
                 {
                     result.Status = 0;
-                    await _BatteryRepository.UpdateOneAsyn(result);
+                    await _BatteryRepository.UpdateOneAsync(result);
                     return Ok("Delete Successfully");
                 }
                 catch (Exception)

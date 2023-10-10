@@ -19,10 +19,10 @@ namespace API.Controller
         }
         [HttpGet]
         [Route("get-all-category")]
-        public async Task<IActionResult> GetAllCategory(int? page, int? Size)
+        public async Task<IActionResult> GetAllCategory(int page=1, int Size = 10)
         {
-            var pageNumber = page ?? 1; // Trang hiện tại (mặc định là 1)
-            var pageSize = Size ?? 10; // Số mục trên mỗi trang
+            var pageNumber = page; // Trang hiện tại (mặc định là 1)
+            var pageSize = Size; // Số mục trên mỗi trang
 
             var results = await _CategoryRepository.GetAllAsync();
 
@@ -47,7 +47,7 @@ namespace API.Controller
         public async Task<IActionResult> GetCategoryById(string id)
         {
             var result = await _CategoryRepository.GetByIdAsync(id);
-            if (result == null || result.Status == 0) return Ok("Category Do Not Exit");
+            if (result == null || result.Status == 0) return BadRequest("Category Do Not Exit");
             return Ok(result);
         }
 
@@ -73,7 +73,7 @@ namespace API.Controller
             };
             try
             {
-                var result = await _CategoryRepository.AddOneAsyn(cv);
+                var result = await _CategoryRepository.AddOneAsync(cv);
                 return Ok(cv);
             }
             catch (Exception)
@@ -82,7 +82,7 @@ namespace API.Controller
             }
 
         }
-        [HttpPost]
+        [HttpPut]
         [Route("update-category/id")]
         public async Task<IActionResult> UpdateCategory(string id, [FromForm] UpdateCategoryViewModel UpdateModel)
         {
@@ -101,7 +101,7 @@ namespace API.Controller
                 result.Status = UpdateModel.Status;
                 try
                 {
-                    await _CategoryRepository.UpdateOneAsyn(result);
+                    await _CategoryRepository.UpdateOneAsync(result);
                     return Ok(result);
                 }
                 catch (Exception)
@@ -127,7 +127,7 @@ namespace API.Controller
                 try
                 {
                     result.Status = 0;
-                    await _CategoryRepository.UpdateOneAsyn(result);
+                    await _CategoryRepository.UpdateOneAsync(result);
                     return Ok("Delete Successfully");
                 }
                 catch (Exception)
