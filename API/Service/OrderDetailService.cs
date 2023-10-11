@@ -53,10 +53,13 @@ namespace API.Service
                 };
             }
 
+            OrderDetail ExistOrderDetail =new OrderDetail();
+
             do
             {
                 id = "ORDL" + Helper.GenerateRandomString(5);
-            } while (data.Any(c => c.ID == id));
+                ExistOrderDetail = await _OrderDetailRepo.GetByIdAsync(id);
+            } while (ExistOrderDetail!=null);
             OrderDetail orderDetail= new OrderDetail()
             { 
                 ID= id,
@@ -109,6 +112,7 @@ namespace API.Service
                     Status=a.Status,
                     ProductName=b.Name,
                     Quatity=a.Quatity,
+                    ProductID=b.ID
                 }
                 ).ToList();
             return orderDetailDtos;
@@ -132,7 +136,7 @@ namespace API.Service
                 return new ServiceResults<OrderDetailResponse>()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Bad Request",
+                    ErrorMessage = "The product does not have enough quantity available or is not working properly.",
                 };
             }
             var result = await _OrderDetailRepo.GetByIdAsync(ID);

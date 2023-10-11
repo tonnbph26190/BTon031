@@ -52,6 +52,10 @@ namespace DATA.Context
         public DbSet<Resolution> Resolutions { get; set; }
         public DbSet<Order> Order { get; set; }
         public DbSet<OrderDetail> OrderDetail  { get; set; }
+        public DbSet<OrderDetailLaptopDetail> OrderDetailLaptopDetails { get; set; }
+        public DbSet<OrderLaptop> OrderLaptops { get; set; }
+        public DbSet<OrderMonitor> OrderMonitors  { get; set; }
+        public DbSet<OrderMonitorDetail> OrderMonitorDetails  { get; set; }
         public DbSet<DATA.Entity.Monitor> Monitors { get; set; }
     }
 }

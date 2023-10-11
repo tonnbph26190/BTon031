@@ -27,5 +27,6 @@ namespace DATA.Entity
         public Producer? producer { get; set; }
         public Category? Category { get; set; }
         public ICollection<MonitorDetail>? MonitorDetails { get; set; }
+
     }
 }

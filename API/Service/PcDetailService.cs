@@ -43,9 +43,15 @@ namespace API.Service
             _CoolingRepository = CoolingRepository;
             _Mapper = mapper;
         }
+
+        /// <summary>
+        /// Lấy toàn bộ dự liệu PcDetail
+        /// </summary>
+        /// <returns></returns>
         public async Task<IEnumerable<PcDto>> GetAll()
         {
             List<PcDto> PcDetails = new List<PcDto>();
+
             PcDetails =
                 (
                 from a in await _PcDetailRepository.GetAllAsync()
@@ -86,9 +92,17 @@ namespace API.Service
                     Name ="PC "+l.Name+" " +k.Name + " " + b.Name + " " + f.Name,
                 }
                 ).ToList();
+
             var filteredPcDetail = PcDetails.Where(x => x.Status == 1).ToList();
+
             return filteredPcDetail;
         }
+
+        /// <summary>
+        /// check điều kiện của repuest phải có số lượng >0 type= 2 status =1
+        /// </summary>
+        /// <param name="update"></param>
+        /// <returns></returns>
         public async Task<bool> IsUpdateRequestValid(IPcDetailViewModel update)
         {
             var Ram = await _RamRepository.GetByIdAsync(update.RamID);
@@ -101,19 +115,142 @@ namespace API.Service
             var Case = await _CaseRepository.GetByIdAsync(update.CaseID);
             var Custom = await _CustomRepository.GetByIdAsync(update.CustomID);
 
-            bool isValid = false;
-
-            if (Ram.Status == 0 || SSD.Status == 0 || Power.Status == 0 || PC.Status == 0 || Main.Status == 0 || Vga.Status == 0 || cooling.Status == 0 || Case.Status == 0 || Custom.Status == 0)
+            if (Ram.Status == 0)
             {
-                isValid = true;
+                LogError("RAM is not available.");
+                return false;
             }
 
-            if (Vga.Type != 2 || SSD.Type != 2 || Ram.Type != 2 || Main.Type != 2 || Vga.Quatity <= 0 || SSD.Quatity <= 0 || Ram.Quatity <= 0 || Main.  Quatity <= 0|| Case.Quatity <= 0 || cooling.Quatity <= 0 || Power.Quatity <= 0 || Custom.Quatity <= 0)
+            if (SSD.Status == 0)
             {
-                isValid = false;
+                LogError("SSD is not available.");
+                return false;
             }
 
-            return isValid;
+            if (Power.Status == 0)
+            {
+                LogError("Power is not available.");
+                return false;
+            }
+
+            if (PC.Status == 0)
+            {
+                LogError("PC is not available.");
+                return false;
+            }
+
+            if (Main.Status == 0)
+            {
+                LogError("Main is not available.");
+                return false;
+            }
+
+            if (Vga.Status == 0)
+            {
+                LogError("VGA is not available.");
+                return false;
+            }
+
+            if (cooling.Status == 0)
+            {
+                LogError("Cooling is not available.");
+                return false;
+            }
+
+            if (Case.Status == 0)
+            {
+                LogError("Case is not available.");
+                return false;
+            }
+
+            if (Custom.Status == 0)
+            {
+                LogError("Custom is not available.");
+                return false;
+            }
+
+            if (Vga.Type != 2)
+            {
+                LogError("VGA type is invalid.");
+                return false;
+            }
+
+            if (SSD.Type != 2)
+            {
+                LogError("SSD type is invalid.");
+                return false;
+            }
+
+            if (Ram.Type != 2)
+            {
+                LogError("RAM type is invalid.");
+                return false;
+            }
+
+            if (Main.Type != 2)
+            {
+                LogError("Main type is invalid.");
+                return false;
+            }
+
+            if (Vga.Quatity <= 0)
+            {
+                LogError("VGA quantity is invalid.");
+                return false;
+            }
+
+            if (SSD.Quatity <= 0)
+            {
+                LogError("SSD quantity is invalid.");
+                return false;
+            }
+
+            if (Ram.Quatity <= 0)
+            {
+                LogError("RAM quantity is invalid.");
+                return false;
+            }
+
+            if (Main.Quatity <= 0)
+            {
+                LogError("Main quantity is invalid.");
+                return false;
+            }
+
+            if (Case.Quatity <= 0)
+            {
+                LogError("Case quantity is invalid.");
+                return false;
+            }
+
+            if (cooling.Quatity <= 0)
+            {
+                LogError("Cooling quantity is invalid.");
+                return false;
+            }
+
+            if (Power.Quatity <= 0)
+            {
+                LogError("Power quantity is invalid.");
+                return false;
+            }
+
+            if (Custom.Quatity <= 0)
+            {
+                LogError("Custom quantity is invalid.");
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// viết log báo lỗi
+        /// </summary>
+        /// <param name="errorMessage"></param>
+        private void LogError(string errorMessage)
+        {
+            Console.WriteLine(errorMessage);
         }
         public async Task<PcDetail> CheckPcDetailExistence(IPcDetailViewModel update)
         {
@@ -130,6 +267,15 @@ namespace API.Service
                         && x.CustomID == update.CustomID);
             return objExist;
         }
+
+        /// <summary>
+        /// Lọc Pc detail theo giá, tên, trang thái
+        /// </summary>
+        /// <param name="search"></param>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
         public async Task<IEnumerable<PcDto>> GetFilteredProductDetails(string? search, decimal? from, decimal? to, int? status)
         {
             var listProductDetail = await GetAll();
@@ -181,12 +327,75 @@ namespace API.Service
             var Custom = await _CustomRepository.GetByIdAsync(create.CustomID);
 
             // Check số lượng product có hợp lệ không
-            if (create.Quatity >= ram.Quatity || create.Quatity >= SSD.Quatity || create.Quatity >= Power.Quatity || create.Quatity >= Main.Quatity || create.Quatity >= vga.Quatity || create.Quatity >= cooling.Quatity || create.Quatity >= Case.Quatity || create.Quatity >= Custom.Quatity)
+            if (create.Quatity >= ram.Quatity)
             {
                 return new ServiceResults<PcDetailResponse>()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Create Fail",
+                    ErrorMessage = "Create Fail: Quantity exceeds RAM's available quantity",
+                };
+            }
+
+            if (create.Quatity >= SSD.Quatity)
+            {
+                return new ServiceResults<PcDetailResponse>()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Create Fail: Quantity exceeds SSD's available quantity",
+                };
+            }
+
+            if (create.Quatity >= Power.Quatity)
+            {
+                return new ServiceResults<PcDetailResponse>()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Create Fail: Quantity exceeds Power's available quantity",
+                };
+            }
+
+            if (create.Quatity >= Main.Quatity)
+            {
+                return new ServiceResults<PcDetailResponse>()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Create Fail: Quantity exceeds Main's available quantity",
+                };
+            }
+
+            if (create.Quatity >= vga.Quatity)
+            {
+                return new ServiceResults<PcDetailResponse>()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Create Fail: Quantity exceeds VGA's available quantity",
+                };
+            }
+
+            if (create.Quatity >= cooling.Quatity)
+            {
+                return new ServiceResults<PcDetailResponse>()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Create Fail: Quantity exceeds Cooling's available quantity",
+                };
+            }
+
+            if (create.Quatity >= Case.Quatity)
+            {
+                return new ServiceResults<PcDetailResponse>()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Create Fail: Quantity exceeds Case's available quantity",
+                };
+            }
+
+            if (create.Quatity >= Custom.Quatity)
+            {
+                return new ServiceResults<PcDetailResponse>()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Create Fail: Quantity exceeds Custom's available quantity",
                 };
             }
 
@@ -195,12 +404,12 @@ namespace API.Service
                 var data = await _PcDetailRepository.GetAllAsync();
                 var id = "DTPC" + Helper.GenerateRandomString(5);
                 var seri = Helper.GenerateRandomString(8);
-
+                PcDetail existId=new PcDetail();
                 do
                 {
                     id = "DTPC" + Helper.GenerateRandomString(5);
-                    seri = Helper.GenerateRandomString(8);
-                } while (data.Any(c => c.ID == id || c.Seri == seri));
+                    existId = await _PcDetailRepository.GetByIdAsync(id);
+                } while (existId != null);
 
                 var pc = new PcDetail()
                 {
@@ -234,10 +443,10 @@ namespace API.Service
                 result.IsSuccess = true;
                 result.Data = response;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 result.IsSuccess = false;
-                result.ErrorMessage = "Create Fail";
+                result.ErrorMessage = $"Create Fail because exception:{e}";
             }
 
             return result;
@@ -265,7 +474,7 @@ namespace API.Service
             var previousRam = result.RamID;
             var previousQuatity=result.Quatity;
 
-            var Ram = await _RamRepository.GetByIdAsync(update.RamID);
+            var newRam = await _RamRepository.GetByIdAsync(update.RamID);
             var newSSD = await _SSDRepository.GetByIdAsync(update.SSDId);
             var newPower = await _PowerRepository.GetByIdAsync(update.PowerID);
             var newMain = await _MainRepository.GetByIdAsync(update.MainID);
@@ -277,14 +486,79 @@ namespace API.Service
             result.Status = update.Status;
 
             bool hasChanged = false;
-            if (update.Quatity>Ram.Quatity||update.Quatity>newSSD.Quatity||update.Quatity>newPower.Quatity||update.Quatity>newMain.Quatity||update.Quatity>newVGACard.Quatity||update.Quatity>newCooling.Quatity||update.Quatity>newCase.Quatity||update.Quatity>newCustom.Quatity)
+
+            if (update.Quatity > newRam.Quatity)
             {
                 return new ServiceResults<PcDetailResponse>()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Update Fail",
+                    ErrorMessage = "Update Fail: Quantity exceeds RAM quantity",
                 };
             }
+
+            if (update.Quatity > newSSD.Quatity)
+            {
+                return new ServiceResults<PcDetailResponse>()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Update Fail: Quantity exceeds SSD quantity",    
+                };
+            }
+
+            if (update.Quatity > newPower.Quatity)
+            {
+                return new ServiceResults<PcDetailResponse>()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Update Fail: Quantity exceeds Power quantity",
+                };
+            }
+
+            if (update.Quatity > newMain.Quatity)
+            {
+                return new ServiceResults<PcDetailResponse>()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Update Fail: Quantity exceeds Main quantity",
+                };
+            }
+
+            if (update.Quatity > newVGACard.Quatity)
+            {
+                return new ServiceResults<PcDetailResponse>()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Update Fail: Quantity exceeds VGA Card quantity",
+                };
+            }
+
+            if (update.Quatity > newCooling.Quatity)
+            {
+                return new ServiceResults<PcDetailResponse>()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Update Fail: Quantity exceeds Cooling quantity",
+                };
+            }
+
+            if (update.Quatity > newCase.Quatity)
+            {
+                return new ServiceResults<PcDetailResponse>()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Update Fail: Quantity exceeds Case quantity",
+                };
+            }
+
+            if (update.Quatity > newCustom.Quatity)
+            {
+                return new ServiceResults<PcDetailResponse>()
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Update Fail: Quantity exceeds Custom quantity",
+                };
+            }
+
 
             if (result.Quatity != update.Quatity)
             {
@@ -295,8 +569,7 @@ namespace API.Service
                 // Subtract or add the difference to the corresponding inventory items
                 if (quantityDifference > 0)
                 {
-                    // Subtract from inventory items
-                    Ram.Quatity -= quantityDifference;
+                    newRam.Quatity -= quantityDifference;
                     newSSD.Quatity -= quantityDifference;
                     newPower.Quatity -= quantityDifference;
                     newMain.Quatity -= quantityDifference;
@@ -306,9 +579,8 @@ namespace API.Service
                     newCustom.Quatity -= quantityDifference;
                 }
                 else if (quantityDifference < 0)
-                {
-                   
-                    Ram.Quatity += Math.Abs(quantityDifference);
+                { 
+                    newRam.Quatity += Math.Abs(quantityDifference);
                     newSSD.Quatity += Math.Abs(quantityDifference);
                     newPower.Quatity += Math.Abs(quantityDifference);
                     newMain.Quatity += Math.Abs(quantityDifference);
@@ -317,9 +589,8 @@ namespace API.Service
                     newCase.Quatity += Math.Abs(quantityDifference);
                     newCustom.Quatity += Math.Abs(quantityDifference);
                 }
-
-              
-                await _RamRepository.UpdateOneAsync(Ram);
+             
+                await _RamRepository.UpdateOneAsync(newRam);
                 await _SSDRepository.UpdateOneAsync(newSSD);
                 await _PowerRepository.UpdateOneAsync(newPower);
                 await _MainRepository.UpdateOneAsync(newMain);
@@ -331,24 +602,23 @@ namespace API.Service
 
             if (result.RamID != update.RamID)
             {
-              
-                await _RamRepository.UpdateQuantity(Ram,Ram.Quatity -update.Quatity ??0);
+                await _RamRepository.UpdateQuantity(newRam,newRam.Quatity -update.Quatity ??0);
+
                 var PreviousRam = await _RamRepository.GetByIdAsync(previousRam);
                 await _RamRepository.UpdateQuantity(PreviousRam,PreviousRam.Quatity+previousQuatity??0);
+
                 result.RamID = update.RamID;
                 hasChanged = true;
             }
 
             if (result.SSDId != update.SSDId)
             {
-               
                 await _SSDRepository.UpdateQuantity(newSSD, newSSD.Quatity - update.Quatity ?? 0);
 
                 var previousSSD = await _SSDRepository.GetByIdAsync(previousSsdID);
                 await _SSDRepository.UpdateQuantity(previousSSD, previousSSD.Quatity + previousQuatity ?? 0);
 
                 result.SSDId = update.SSDId;
-
                 hasChanged = true;
             }
 
@@ -365,8 +635,7 @@ namespace API.Service
             }
 
             if (result.MainID != update.MainID)
-            {
-                
+            {  
                 await _MainRepository.UpdateQuantity(newMain, newMain.Quatity - update.Quatity ?? 0);
 
                 var previousMain = await _MainRepository.GetByIdAsync(previousMainID);
@@ -378,7 +647,6 @@ namespace API.Service
 
             if (result.VgaID != update.VgaID)
             {
-              
                 await _VGARepository.UpdateQuantity(newVGACard, newVGACard.Quatity - update.Quatity ?? 0);
 
                 var previousVGACard = await _VGARepository.GetByIdAsync(previousVgaID);
@@ -389,8 +657,7 @@ namespace API.Service
             }
 
             if (result.CoolingID != update.CoolingID)
-            {
-               
+            {              
                 await _CoolingRepository.UpdateQuantity(newCooling, newCooling.Quatity - update.Quatity ?? 0);
 
                 var previousCooling = await _CoolingRepository.GetByIdAsync(previousCoolingID);
@@ -401,8 +668,7 @@ namespace API.Service
             }
 
             if (result.CaseID != update.CaseID)
-            {
-               
+            {              
                 await _CaseRepository.UpdateQuantity(newCase, newCase.Quatity - update.Quatity ?? 0);
 
                 var previousCase = await _CaseRepository.GetByIdAsync(previousCaseID);
@@ -414,7 +680,6 @@ namespace API.Service
 
             if (result.CustomID != update.CustomID)
             {
-               
                 await _CustomRepository.UpdateQuantity(newCustom, newCustom.Quatity - update.Quatity ?? 0);
 
                 var previousCustom = await _CustomRepository.GetByIdAsync(previousCustomID);
@@ -438,12 +703,12 @@ namespace API.Service
                         Data = response,
                     };
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
                     return new ServiceResults<PcDetailResponse>()
                     {
                         IsSuccess = false,
-                        ErrorMessage = "Update Fail",
+                        ErrorMessage = $"Update Fail because exception: {e}",
                     };
                 }
             }

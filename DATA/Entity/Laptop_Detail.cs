@@ -64,5 +64,6 @@ namespace DATA.Entity
         public Screen? Screen { get; set; }
 
         public Laptop? Laptop { get; set; }
+        public virtual ICollection<OrderDetailLaptopDetail> OrderDetailLaptopDetails { get; set; }
     }
 }

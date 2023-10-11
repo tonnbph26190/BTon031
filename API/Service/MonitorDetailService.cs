@@ -58,6 +58,7 @@ namespace API.Service
                     Name=e.Name+" "+d.Name+" "+b.Value+" "+a.Inch+" "+a.Rate,
                     ProducreName=e.Name,
                     CatgoryName=f.Name,
+                    Quatity=a.Quatity
                 }
                 
                 ).ToList();
@@ -80,12 +81,31 @@ namespace API.Service
             var panel = await _PanelRepository.GetByIdAsync(create.PanelID);
             var resolution = await _ResolutionRepository.GetByIdAsync(create.ResolutionID);
 
-            if (monitor.Status == 0 || panel.Status == 0 || resolution.Status == 0)
+            if (monitor.Status == 0)
             {
+                LogError("Invalid monitor status");
+                return true;
+            }
+
+            if (panel.Status == 0)
+            {
+                LogError("Invalid panel status");
+                return true;
+            }
+
+            if (resolution.Status == 0)
+            {
+                LogError("Invalid resolution status");
                 return true;
             }
 
             return false;
+        }
+
+        private void LogError(string errorMessage)
+        {
+            // Thực hiện ghi log ở đây, ví dụ:
+            Console.WriteLine($"Error: {errorMessage}");
         }
         public async Task<IEnumerable<MonitorDetailDto>> SearchProductDetails(string? search, decimal? from, decimal? to, int? status)
         {
@@ -169,7 +189,7 @@ namespace API.Service
             try
             {
                 var result = await _MonitorDetailRepository.AddOneAsync(monitorDetail);
-                var response = _Mapper.Map<MonitorDetailResponse>(result);
+                var response = _Mapper.Map<MonitorDetailResponse>(result);  
 
                 return new ServiceResults<MonitorDetailResponse>()
                 {
