@@ -71,7 +71,7 @@ namespace API.Controller
                 return StatusCode(StatusCodes.Status400BadRequest, "Error Request");
             }
             //
-            if (await _Service.IsUpdateRequestValid(create))
+            if (!await _Service.IsUpdateRequestValid(create))
             {
                 return StatusCode(StatusCodes.Status400BadRequest, "Error Request");
             }

@@ -3,6 +3,7 @@ using System;
 using DATA.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,10 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace DATA.Migrations
 {
     [DbContext(typeof(LapDbContext))]
-    partial class LapDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231010105508_siu_suy")]
+    partial class siu_suy
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

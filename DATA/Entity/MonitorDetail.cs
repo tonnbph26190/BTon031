@@ -57,5 +57,6 @@ namespace DATA.Entity
         public Panel Panel { get; set; }
         public Monitor Monitor { get; set; }
         public Resolution Resolution { get; set; }
+        public virtual ICollection<OrderMonitorDetail> OrderMonitorDetails { get; set; }
     }
 }

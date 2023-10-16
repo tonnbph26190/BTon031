@@ -3,6 +3,7 @@ using System;
 using DATA.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,10 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace DATA.Migrations
 {
     [DbContext(typeof(LapDbContext))]
-    partial class LapDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231010103110_suy")]
+    partial class suy
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -531,6 +533,7 @@ namespace DATA.Migrations
                         .HasColumnType("NVARCHAR2(50)");
 
                     b.Property<string>("OrderDetailID")
+                        .IsRequired()
                         .HasColumnType("NVARCHAR2(50)");
 
                     b.Property<string>("OrderLaptopID")
@@ -1132,7 +1135,9 @@ namespace DATA.Migrations
 
                     b.HasOne("DATA.Entity.OrderDetail", "OrderDetail")
                         .WithMany()
-                        .HasForeignKey("OrderDetailID");
+                        .HasForeignKey("OrderDetailID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("DATA.Entity.OrderLaptop", null)
                         .WithMany("OrderDetailLaptopDetails")

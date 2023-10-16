@@ -3,6 +3,7 @@ using System;
 using DATA.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,10 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace DATA.Migrations
 {
     [DbContext(typeof(LapDbContext))]
-    partial class LapDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231010032750_ok")]
+    partial class ok
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -488,13 +490,19 @@ namespace DATA.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("TIMESTAMP(7)");
 
+                    b.Property<string>("LaptopDetailID")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(30)");
+
+                    b.Property<string>("LatopDetailID")
+                        .HasColumnType("NVARCHAR2(2000)");
+
                     b.Property<string>("OrderID")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("NVARCHAR2(50)");
 
                     b.Property<string>("PcDetailID")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("NVARCHAR2(50)");
 
@@ -508,113 +516,14 @@ namespace DATA.Migrations
                         .HasColumnType("NUMBER(10)");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("LaptopDetailID");
 
                     b.HasIndex("OrderID");
 
                     b.HasIndex("PcDetailID");
 
                     b.ToTable("OrderDetail");
-                });
-
-            modelBuilder.Entity("DATA.Entity.OrderDetailLaptopDetail", b =>
-                {
-                    b.Property<string>("ID")
-                        .HasMaxLength(50)
-                        .HasColumnType("NVARCHAR2(50)");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TIMESTAMP(7)");
-
-                    b.Property<string>("Laptop_DetailID")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("NVARCHAR2(50)");
-
-                    b.Property<string>("OrderDetailID")
-                        .HasColumnType("NVARCHAR2(50)");
-
-                    b.Property<string>("OrderLaptopID")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("NVARCHAR2(50)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("DECIMAL(18, 2)");
-
-                    b.Property<int>("Quatity")
-                        .HasColumnType("NUMBER(10)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("NUMBER(10)");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("Laptop_DetailID");
-
-                    b.HasIndex("OrderDetailID");
-
-                    b.HasIndex("OrderLaptopID");
-
-                    b.ToTable("OrderDetailLaptopDetails");
-                });
-
-            modelBuilder.Entity("DATA.Entity.OrderLaptop", b =>
-                {
-                    b.Property<string>("ID")
-                        .HasMaxLength(50)
-                        .HasColumnType("NVARCHAR2(50)");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("OrderLaptops");
-                });
-
-            modelBuilder.Entity("DATA.Entity.OrderMonitor", b =>
-                {
-                    b.Property<string>("ID")
-                        .HasMaxLength(50)
-                        .HasColumnType("NVARCHAR2(50)");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("OrderMonitors");
-                });
-
-            modelBuilder.Entity("DATA.Entity.OrderMonitorDetail", b =>
-                {
-                    b.Property<string>("ID")
-                        .HasMaxLength(50)
-                        .HasColumnType("NVARCHAR2(50)");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TIMESTAMP(7)");
-
-                    b.Property<string>("MonitorDetailID")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("NVARCHAR2(50)");
-
-                    b.Property<string>("OrderID")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("NVARCHAR2(50)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("DECIMAL(18, 2)");
-
-                    b.Property<int>("Quatity")
-                        .HasColumnType("NUMBER(10)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("NUMBER(10)");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("MonitorDetailID");
-
-                    b.HasIndex("OrderID");
-
-                    b.ToTable("OrderMonitorDetails");
                 });
 
             modelBuilder.Entity("DATA.Entity.Panel", b =>
@@ -1105,6 +1014,12 @@ namespace DATA.Migrations
 
             modelBuilder.Entity("DATA.Entity.OrderDetail", b =>
                 {
+                    b.HasOne("DATA.Entity.Laptop_Detail", "LaptopDetail")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("LaptopDetailID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("DATA.Entity.Order", "Order")
                         .WithMany("OrderDetails")
                         .HasForeignKey("OrderID")
@@ -1113,55 +1028,13 @@ namespace DATA.Migrations
 
                     b.HasOne("DATA.Entity.PcDetail", "PcDetail")
                         .WithMany("OrderDetails")
-                        .HasForeignKey("PcDetailID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PcDetailID");
+
+                    b.Navigation("LaptopDetail");
 
                     b.Navigation("Order");
 
                     b.Navigation("PcDetail");
-                });
-
-            modelBuilder.Entity("DATA.Entity.OrderDetailLaptopDetail", b =>
-                {
-                    b.HasOne("DATA.Entity.Laptop_Detail", "Laptop_Detail")
-                        .WithMany("OrderDetailLaptopDetails")
-                        .HasForeignKey("Laptop_DetailID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DATA.Entity.OrderDetail", "OrderDetail")
-                        .WithMany()
-                        .HasForeignKey("OrderDetailID");
-
-                    b.HasOne("DATA.Entity.OrderLaptop", null)
-                        .WithMany("OrderDetailLaptopDetails")
-                        .HasForeignKey("OrderLaptopID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Laptop_Detail");
-
-                    b.Navigation("OrderDetail");
-                });
-
-            modelBuilder.Entity("DATA.Entity.OrderMonitorDetail", b =>
-                {
-                    b.HasOne("DATA.Entity.MonitorDetail", "MonitorDetail")
-                        .WithMany("OrderMonitorDetails")
-                        .HasForeignKey("MonitorDetailID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DATA.Entity.OrderMonitor", "Order")
-                        .WithMany("OrderDetails")
-                        .HasForeignKey("OrderID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("MonitorDetail");
-
-                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("DATA.Entity.PC", b =>
@@ -1290,7 +1163,7 @@ namespace DATA.Migrations
 
             modelBuilder.Entity("DATA.Entity.Laptop_Detail", b =>
                 {
-                    b.Navigation("OrderDetailLaptopDetails");
+                    b.Navigation("OrderDetails");
                 });
 
             modelBuilder.Entity("DATA.Entity.Main", b =>
@@ -1305,22 +1178,7 @@ namespace DATA.Migrations
                     b.Navigation("MonitorDetails");
                 });
 
-            modelBuilder.Entity("DATA.Entity.MonitorDetail", b =>
-                {
-                    b.Navigation("OrderMonitorDetails");
-                });
-
             modelBuilder.Entity("DATA.Entity.Order", b =>
-                {
-                    b.Navigation("OrderDetails");
-                });
-
-            modelBuilder.Entity("DATA.Entity.OrderLaptop", b =>
-                {
-                    b.Navigation("OrderDetailLaptopDetails");
-                });
-
-            modelBuilder.Entity("DATA.Entity.OrderMonitor", b =>
                 {
                     b.Navigation("OrderDetails");
                 });

@@ -97,20 +97,85 @@ namespace API.Service
             var Screen = await _ScreenRepositoty.GetByIdAsync(monitorViewModel.IdScreen);
             var VGA = await _VGARepositoty.GetByIdAsync(monitorViewModel.IdVga);
 
-            bool isAnyComponentInvalid = Ram.Status == 0 ||
-                                         SSD.Status == 0 ||
-                                         Battery.Status == 0 ||
-                                         Cam.Status == 0 ||
-                                         Lap.Status == 0 ||
-                                         Main.Status == 0 ||
-                                         Screen.Status == 0 ||
-                                         VGA.Status == 0 ||
-                                         VGA.Type != 1 ||
-                                         SSD.Type != 1 ||
-                                         Ram.Type != 1 ||
-                                         Main.Type != 1;
+            if (Ram.Status == 0)
+            {
+                LogError("Invalid RAM status");
+                return true;
+            }
 
-            return isAnyComponentInvalid;
+            if (SSD.Status == 0)
+            {
+                LogError("Invalid SSD status");
+                return true;
+            }
+
+            if (Battery.Status == 0)
+            {
+                LogError("Invalid Battery status");
+                return true;
+            }
+
+            if (Cam.Status == 0)
+            {
+                LogError("Invalid Webcam status");
+                return true;
+            }
+
+            if (Lap.Status == 0)
+            {
+                LogError("Invalid Laptop status");
+                return true;
+            }
+
+            if (Main.Status == 0)
+            {
+                LogError("Invalid Main status");
+                return true;
+            }
+
+            if (Screen.Status == 0)
+            {
+                LogError("Invalid Screen status");
+                return true;
+            }
+
+            if (VGA.Status == 0)
+            {
+                LogError("Invalid VGA status");
+                return true;
+            }
+
+            if (VGA.Type != 1)
+            {
+                LogError("Invalid VGA type");
+                return true;
+            }
+
+            if (SSD.Type != 1)
+            {
+                LogError("Invalid SSD type");
+                return true;
+            }
+
+            if (Ram.Type != 1)
+            {
+                LogError("Invalid RAM type");
+                return true;
+            }
+
+            if (Main.Type != 1)
+            {
+                LogError("Invalid Main type");
+                return true;
+            }
+
+            return false;
+        }
+
+        private void LogError(string errorMessage)
+        {
+            // Thực hiện ghi log ở đây, ví dụ:
+            Console.WriteLine($"Error: {errorMessage}");
         }
         public async Task<Laptop_Detail> FindExistingDetailAsync(ILaptopDetailViewModel model)
         {

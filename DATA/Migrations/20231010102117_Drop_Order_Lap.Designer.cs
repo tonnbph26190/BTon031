@@ -3,6 +3,7 @@ using System;
 using DATA.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Oracle.EntityFrameworkCore.Metadata;
 
@@ -11,9 +12,10 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace DATA.Migrations
 {
     [DbContext(typeof(LapDbContext))]
-    partial class LapDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231010102117_Drop_Order_Lap")]
+    partial class Drop_Order_Lap
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -514,59 +516,6 @@ namespace DATA.Migrations
                     b.HasIndex("PcDetailID");
 
                     b.ToTable("OrderDetail");
-                });
-
-            modelBuilder.Entity("DATA.Entity.OrderDetailLaptopDetail", b =>
-                {
-                    b.Property<string>("ID")
-                        .HasMaxLength(50)
-                        .HasColumnType("NVARCHAR2(50)");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("TIMESTAMP(7)");
-
-                    b.Property<string>("Laptop_DetailID")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("NVARCHAR2(50)");
-
-                    b.Property<string>("OrderDetailID")
-                        .HasColumnType("NVARCHAR2(50)");
-
-                    b.Property<string>("OrderLaptopID")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("NVARCHAR2(50)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("DECIMAL(18, 2)");
-
-                    b.Property<int>("Quatity")
-                        .HasColumnType("NUMBER(10)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("NUMBER(10)");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("Laptop_DetailID");
-
-                    b.HasIndex("OrderDetailID");
-
-                    b.HasIndex("OrderLaptopID");
-
-                    b.ToTable("OrderDetailLaptopDetails");
-                });
-
-            modelBuilder.Entity("DATA.Entity.OrderLaptop", b =>
-                {
-                    b.Property<string>("ID")
-                        .HasMaxLength(50)
-                        .HasColumnType("NVARCHAR2(50)");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("OrderLaptops");
                 });
 
             modelBuilder.Entity("DATA.Entity.OrderMonitor", b =>
@@ -1122,29 +1071,6 @@ namespace DATA.Migrations
                     b.Navigation("PcDetail");
                 });
 
-            modelBuilder.Entity("DATA.Entity.OrderDetailLaptopDetail", b =>
-                {
-                    b.HasOne("DATA.Entity.Laptop_Detail", "Laptop_Detail")
-                        .WithMany("OrderDetailLaptopDetails")
-                        .HasForeignKey("Laptop_DetailID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DATA.Entity.OrderDetail", "OrderDetail")
-                        .WithMany()
-                        .HasForeignKey("OrderDetailID");
-
-                    b.HasOne("DATA.Entity.OrderLaptop", null)
-                        .WithMany("OrderDetailLaptopDetails")
-                        .HasForeignKey("OrderLaptopID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Laptop_Detail");
-
-                    b.Navigation("OrderDetail");
-                });
-
             modelBuilder.Entity("DATA.Entity.OrderMonitorDetail", b =>
                 {
                     b.HasOne("DATA.Entity.MonitorDetail", "MonitorDetail")
@@ -1288,11 +1214,6 @@ namespace DATA.Migrations
                     b.Navigation("Laptop_Detail");
                 });
 
-            modelBuilder.Entity("DATA.Entity.Laptop_Detail", b =>
-                {
-                    b.Navigation("OrderDetailLaptopDetails");
-                });
-
             modelBuilder.Entity("DATA.Entity.Main", b =>
                 {
                     b.Navigation("Laptop_Detail");
@@ -1313,11 +1234,6 @@ namespace DATA.Migrations
             modelBuilder.Entity("DATA.Entity.Order", b =>
                 {
                     b.Navigation("OrderDetails");
-                });
-
-            modelBuilder.Entity("DATA.Entity.OrderLaptop", b =>
-                {
-                    b.Navigation("OrderDetailLaptopDetails");
                 });
 
             modelBuilder.Entity("DATA.Entity.OrderMonitor", b =>

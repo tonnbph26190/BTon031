@@ -19,6 +19,9 @@ builder.Services.AddScoped<IPcDetailService, PcDetailService>();
 builder.Services.AddScoped<ILapTopDetailService, LapTopDetailService>();
 builder.Services.AddScoped<IMonitorDetailService, MonitorDetailService>();
 builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
+builder.Services.AddScoped<IOrderDetailLaptopDetailService, OrderDetailLaptopDetailService>();
+builder.Services.AddScoped<IOrderMonitorDetail, OrderMonitorDetailService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 var app = builder.Build();
 

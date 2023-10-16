@@ -53,10 +53,13 @@ namespace API.Service
                 };
             }
 
+            OrderDetail ExistOrderDetail =new OrderDetail();
+
             do
             {
                 id = "ORDL" + Helper.GenerateRandomString(5);
-            } while (data.Any(c => c.ID == id));
+                ExistOrderDetail = await _OrderDetailRepo.GetByIdAsync(id);
+            } while (ExistOrderDetail!=null);
             OrderDetail orderDetail= new OrderDetail()
             { 
                 ID= id,
@@ -109,19 +112,29 @@ namespace API.Service
                     Status=a.Status,
                     ProductName=b.Name,
                     Quatity=a.Quatity,
+                    ProductID=b.ID
                 }
                 ).ToList();
             return orderDetailDtos;
         }
 
         public async Task<bool> IsUpdateRequestValid(IOrderDetail obj)
-        {    
+        {
+            var pcDetail = await _PcDetailRepo.GetByIdAsync(obj.PcDetailID);
 
-         var PcDetail = await _PcDetailRepo.GetByIdAsync(obj.PcDetailID);
-            if (PcDetail.Quatity<0||PcDetail.Status==0)
+            if (pcDetail.Quatity <= 0)
             {
+                // Ghi log lỗi khi Quantity < 0
+                Console.WriteLine("Error: Quantity is less than 0.");
                 return false;
             }
+            else if (pcDetail.Status == 0)
+            {
+                // Ghi log lỗi khi Status == 0
+                Console.WriteLine("Error: Status is equal to 0.");
+                return false;
+            }
+
             return true;
         }
 
@@ -132,7 +145,7 @@ namespace API.Service
                 return new ServiceResults<OrderDetailResponse>()
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Bad Request",
+                    ErrorMessage = "The product does not have enough quantity available or is not working properly.",
                 };
             }
             var result = await _OrderDetailRepo.GetByIdAsync(ID);
