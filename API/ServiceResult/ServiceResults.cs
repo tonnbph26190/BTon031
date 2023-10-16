@@ -15,6 +15,7 @@ namespace API.ServiceResult
         public int NotAvailableQuantity { get; set; }
         public int LowQuantityProducts { get; set; }
         public decimal TotalPrice { get; set; }
+        public decimal AverageProfitPerProduct { get; set; }
     }
     public class SaleResults 
     {
@@ -27,5 +28,12 @@ namespace API.ServiceResult
         public string Name   { get; set; }
         public int TotalQuantitySold { get; set; }
         
+    }
+    public class OrderDateRangeDto
+    {
+        public DateTime MostOrdersDate { get; set; }
+        public DateTime LeastOrdersDate { get; set; }
+        public int MostOrdersCount { get; set; }
+        public int LeastOrdersCount { get; set; }
     }
 }

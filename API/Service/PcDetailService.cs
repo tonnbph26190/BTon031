@@ -336,7 +336,7 @@ namespace API.Service
                 };
             }
 
-            if (create.Quatity >= SSD.Quatity)
+            if (create.Quatity > SSD.Quatity)
             {
                 return new ServiceResults<PcDetailResponse>()
                 {
@@ -345,7 +345,7 @@ namespace API.Service
                 };
             }
 
-            if (create.Quatity >= Power.Quatity)
+            if (create.Quatity > Power.Quatity)
             {
                 return new ServiceResults<PcDetailResponse>()
                 {
@@ -354,7 +354,7 @@ namespace API.Service
                 };
             }
 
-            if (create.Quatity >= Main.Quatity)
+            if (create.Quatity > Main.Quatity)
             {
                 return new ServiceResults<PcDetailResponse>()
                 {
@@ -363,7 +363,7 @@ namespace API.Service
                 };
             }
 
-            if (create.Quatity >= vga.Quatity)
+            if (create.Quatity > vga.Quatity)
             {
                 return new ServiceResults<PcDetailResponse>()
                 {
@@ -372,7 +372,7 @@ namespace API.Service
                 };
             }
 
-            if (create.Quatity >= cooling.Quatity)
+            if (create.Quatity > cooling.Quatity)
             {
                 return new ServiceResults<PcDetailResponse>()
                 {
@@ -381,7 +381,7 @@ namespace API.Service
                 };
             }
 
-            if (create.Quatity >= Case.Quatity)
+            if (create.Quatity > Case.Quatity)
             {
                 return new ServiceResults<PcDetailResponse>()
                 {
@@ -390,7 +390,7 @@ namespace API.Service
                 };
             }
 
-            if (create.Quatity >= Custom.Quatity)
+            if (create.Quatity > Custom.Quatity)
             {
                 return new ServiceResults<PcDetailResponse>()
                 {

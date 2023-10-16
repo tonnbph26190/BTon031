@@ -16,5 +16,8 @@ namespace API.IService
         Task<ProductDto> GetBestSellingProductForPc();
         Task<ProductDto> GetBestSellingProductForMonitor();
         Task<ProductDto> GetBestSellingProductForLaptop();
+        Task<OrderDateRangeDto> GetMostAndLeastOrdersDateRangeDtoForLaptop();
+        Task<IEnumerable<DateTime>> GetEmptyDateRanges(DateTime startDate, DateTime endDate);
+        Task<SaleResults> CalculateRevenueAndTotalOrdersByTimeRange(DateTime startDate, DateTime endDate);
     }
 }

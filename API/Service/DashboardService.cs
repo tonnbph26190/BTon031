@@ -32,7 +32,7 @@ namespace API.Service
             var estimatedRevenue = laptopDetailData.Sum(x => x.Price - x.COGS);
             var availableQuantity = laptopDetailData.Count(x => x.Quatity > 0);
             var notAvailableQuantity = laptopDetailData.Count(x => x.Quatity == 0);
-            var lowQuantityProducts = laptopDetailData.Count(x => x.Quatity <= 2);
+            var lowQuantityProducts = laptopDetailData.Count(x => x.Quatity <= 2 && x.Quatity > 0);
 
             var revenueSummary = new RevenueSummary<LaptopDetailDto>
             {
@@ -58,7 +58,7 @@ namespace API.Service
             var estimatedRevenue = monitorDetailData.Sum(x => x.Price - x.COGS);
             var availableQuantity = monitorDetailData.Count(x => x.Quatity > 0);
             var notAvailableQuantity = monitorDetailData.Count(x => x.Quatity == 0);
-            var lowQuantityProducts = monitorDetailData.Count(x => x.Quatity <= 2);
+            var lowQuantityProducts = monitorDetailData.Count(x => x.Quatity <= 2 && x.Quatity > 0);
 
             var revenueSummary = new RevenueSummary<MonitorDetailDto>
             {
@@ -77,10 +77,12 @@ namespace API.Service
             var PcDetailData = await _PcDetailService.GetAll();
 
             var totalPrice = PcDetailData.Sum(x => x.Price);
-            var estimatedRevenue = PcDetailData.Sum(x => x.Price - x.COGS);
+            var estimatedRevenue = PcDetailData.Sum(x => x.Price - x.COGS); 
+            var totalQuantity = PcDetailData.Sum(x => x.Quatity);
+            var averageProfitPerProduct = estimatedRevenue / totalQuantity;
             var availableQuantity = PcDetailData.Count(x => x.Quatity > 0);
             var notAvailableQuantity = PcDetailData.Count(x => x.Quatity == 0);
-            var lowQuantityProducts = PcDetailData.Count(x => x.Quatity <= 2);
+            var lowQuantityProducts = PcDetailData.Count(x => x.Quatity <= 2 && x.Quatity > 0);
 
             var revenueSummary = new RevenueSummary<PcDto>
             {
@@ -88,15 +90,15 @@ namespace API.Service
                 AvailableQuantity = availableQuantity,
                 LowQuantityProducts = lowQuantityProducts,
                 TotalPrice = totalPrice,
-                NotAvailableQuantity= notAvailableQuantity,
+                NotAvailableQuantity = notAvailableQuantity,
+                AverageProfitPerProduct = Math.Round(averageProfitPerProduct, 2),
             };
 
             return revenueSummary;
-
         }
 
         /// <summary>
-        /// Lấy tổng số hóa đơn bán được và tổng tiền hóa đơn bán được
+        /// Lấy tổng số hóa đơn bán được và tổng tiền hóa đơn bán được  
         /// </summary>
         /// <returns></returns>
         public async Task<SaleResults> GetTotalSalesForlapTop()
@@ -104,7 +106,7 @@ namespace API.Service
             // Lấy danh sách tất cả chi tiết đơn hàng
             IEnumerable<OrderDetailDto> orderDetails = await _OrderDetailLaptopDetailService.GetAll();
 
-            // Lọc ra các mục có Status = 1 (đã bán)
+            // Lọc ra các mục có Status = 1 (đã bán)    
             IEnumerable<OrderDetailDto> soldOrderDetails = orderDetails.Where(o => o.Status == 1);
 
             // Đếm số hóa đơn theo OrderID
@@ -120,6 +122,7 @@ namespace API.Service
                 TotalOrder = orderCounts.Count(),
                 TotalSale = totalSales,
             };
+           
         }
 
         public async Task<SaleResults> GetTotalSalesForMonitor()
@@ -148,7 +151,7 @@ namespace API.Service
         public async Task<SaleResults> GetTotalSalesForPc()
         {
             // Lấy danh sách tất cả chi tiết đơn hàng
-            IEnumerable<OrderDetailDto> orderDetails = await _OrderMonitorDetail.GetAll();
+            IEnumerable<OrderDetailDto> orderDetails = await _OrderDetailService.GetAll();
 
             // Lọc ra các mục có Status = 1 (đã bán)
             IEnumerable<OrderDetailDto> soldOrderDetails = orderDetails.Where(o => o.Status == 1);
@@ -284,6 +287,79 @@ namespace API.Service
             };
 
             return bestSellingProductDto;
+        }
+
+        /// <summary>
+        /// select ra những ngày mà có ít và nhiều hóa đơn được tạo
+        /// </summary>
+        /// <returns></returns>
+        public async Task<OrderDateRangeDto> GetMostAndLeastOrdersDateRangeDtoForLaptop()
+        {
+            // Lấy danh sách các OrderDetailDtos liên quan đến Laptop
+            var laptopOrderDetailDtos = await _OrderDetailLaptopDetailService.GetAll();
+
+            // Nhóm các OrderDetailDtos theo ngày tạo
+            var groupedByDate = laptopOrderDetailDtos.GroupBy(o => o.CreateDate.Date);
+
+            var mostOrdersDateRange = groupedByDate.OrderByDescending(g => g.Count()).FirstOrDefault();
+            var leastOrdersDateRange = groupedByDate.OrderBy(g => g.Count()).FirstOrDefault();
+
+            // Lấy số hóa đơn bán được tương ứng với khoảng thời gian có số lượng hóa đơn nhiều nhất
+            int mostOrdersCount = mostOrdersDateRange?.Count() ?? 0;
+            // Lấy số hóa đơn bán được tương ứng với khoảng thời gian có số lượng hóa đơn ít nhất
+            int leastOrdersCount = leastOrdersDateRange?.Count() ?? 0;
+
+            return new OrderDateRangeDto
+            {
+                MostOrdersDate = mostOrdersDateRange?.Key ?? DateTime.MinValue,               
+                LeastOrdersDate = leastOrdersDateRange?.Key ?? DateTime.MinValue,
+                MostOrdersCount = mostOrdersCount,
+                LeastOrdersCount = leastOrdersCount
+            };
+        }
+
+        /// <summary>
+        /// Lấy ra những ngày mà không có hóa đơn nào tạo theo khoảng thời gian
+        /// </summary>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <returns></returns>
+        public async Task<IEnumerable<DateTime>> GetEmptyDateRanges(DateTime startDate, DateTime endDate)
+        {
+            var laptopOrderDetailDtos = await _OrderDetailLaptopDetailService.GetAll();
+
+            var orderedDates = laptopOrderDetailDtos
+                .Select(dto => dto.CreateDate.Date)
+                .Distinct()
+                .OrderBy(date => date)
+                .ToList();
+
+            var emptyDateRanges = Enumerable.Range(0, (endDate - startDate).Days + 1)
+                .Select(offset => startDate.AddDays(offset))
+                .Except(orderedDates)
+                .ToList();
+
+            return emptyDateRanges;
+        }
+
+        /// <summary>
+        /// Tính toán số tiền thu được theo khoảng thời gian
+        /// </summary>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
+        /// <returns></returns>
+        public async Task<SaleResults> CalculateRevenueAndTotalOrdersByTimeRange(DateTime startDate, DateTime endDate)
+        {
+            var orderDetails = await _OrderDetailLaptopDetailService.GetAll();
+
+            decimal totalRevenue = orderDetails
+                .Where(o => o.CreateDate >= startDate && o.CreateDate <= endDate)
+                .Sum(o => o.Price);
+
+            int totalOrders = orderDetails
+                .Count(o => o.CreateDate >= startDate && o.CreateDate <= endDate);
+
+            return new SaleResults() {TotalOrder=totalOrders, TotalSale=totalRevenue };
         }
     }
 }

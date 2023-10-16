@@ -37,10 +37,9 @@ namespace API.Service
                 };
             }
             var id = "ODLTD" + Helper.GenerateRandomString(5);
-            var data = await _OrderDetailRepo.GetAllAsync();
             var productDetail = await _LapTopDetailRepo.GetByIdAsync(create.LaptopDetailID);
 
-            if (productDetail.Quatity < create.Quatity || productDetail.Quatity < 0)
+            if (productDetail.Quatity < create.Quatity || productDetail.Quatity <= 0)
             {
                 return new ServiceResults<OrderDetailLaptopResponse>()
                 {
@@ -114,6 +113,7 @@ namespace API.Service
                     Status = a.Status,
                     ProductName = b.Name,
                     Quatity = a.Quatity,
+                    ProductID= b.ID,
                 }
                 ).ToList();
             return orderDetailDtos;

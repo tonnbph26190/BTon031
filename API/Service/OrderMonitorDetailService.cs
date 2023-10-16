@@ -28,12 +28,21 @@ namespace API.Service
 
         public async Task<bool> IsRequestValid(CreateOrderMonitorDetail obj)
         {
-
             var monitorDetail = await _MonitorDetailRepo.GetByIdAsync(obj.MonitorDetailID);
-            if (monitorDetail.Quatity < 0 || monitorDetail.Status == 0)
+
+            if (monitorDetail.Quatity <= 0)
             {
+                // Ghi log lỗi khi Quantity < 0
+                Console.WriteLine("Error: Quantity is less than 0.");
                 return false;
             }
+            else if (monitorDetail.Status == 0)
+            {
+                // Ghi log lỗi khi Status == 0
+                Console.WriteLine("Error: Status is equal to 0.");
+                return false;
+            }
+
             return true;
         }
         public async Task<ServiceResults<MonitorResponse>> Create(CreateOrderMonitorDetail create)

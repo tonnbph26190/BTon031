@@ -119,13 +119,22 @@ namespace API.Service
         }
 
         public async Task<bool> IsUpdateRequestValid(IOrderDetail obj)
-        {    
+        {
+            var pcDetail = await _PcDetailRepo.GetByIdAsync(obj.PcDetailID);
 
-         var PcDetail = await _PcDetailRepo.GetByIdAsync(obj.PcDetailID);
-            if (PcDetail.Quatity<0||PcDetail.Status==0)
+            if (pcDetail.Quatity <= 0)
             {
+                // Ghi log lỗi khi Quantity < 0
+                Console.WriteLine("Error: Quantity is less than 0.");
                 return false;
             }
+            else if (pcDetail.Status == 0)
+            {
+                // Ghi log lỗi khi Status == 0
+                Console.WriteLine("Error: Status is equal to 0.");
+                return false;
+            }
+
             return true;
         }
 

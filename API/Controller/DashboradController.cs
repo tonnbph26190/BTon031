@@ -95,5 +95,27 @@ namespace API.Controller
             }
             return Ok(bestSellingProduct);
         }
+
+        [HttpGet("get-order-date-range")]
+        public async Task<ActionResult<OrderDateRangeDto>> GetOrderDateRange()
+        {
+            var dateRange = await _DashboardService.GetMostAndLeastOrdersDateRangeDtoForLaptop();
+            return Ok(dateRange);
+        }
+
+        [HttpGet("get-empty-date-range")]
+        public async Task<ActionResult<IEnumerable<DateTime>>> GetEmptyDateRanges(DateTime startDate, DateTime endDate)
+        {
+            var emptyDateRanges = await _DashboardService.GetEmptyDateRanges( startDate, endDate);
+            return Ok(emptyDateRanges);
+        }
+
+
+        [HttpGet("get-total-sale-for-laptop-by-time")]
+        public async Task<ActionResult<SaleResults>> GetSalesTotalForLaptopByTime(DateTime startDate, DateTime endDate)
+        {
+            SaleResults results = await _DashboardService.CalculateRevenueAndTotalOrdersByTimeRange(startDate, endDate);
+            return Ok(results);
+        }
     }
 }

@@ -106,16 +106,19 @@ namespace API.Controller
                 {
                     StatusCode(StatusCodes.Status400BadRequest, "Error Request");
                 }
+
                 result.Name = update.Name;
                 result.Status = update.Status;
                 result.Parameter = update.Parameter;
                 result.Type = update.Type;
+
                 if (update.Type == 2)
                 {
                     result.COGS = update.COGS;
                     result.Price = update.Price;
                     result.Quatity = update.Quatity;
                 }
+
                 try
                 {
                     await _repo.UpdateOneAsync(result);
